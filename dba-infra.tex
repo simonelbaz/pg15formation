@@ -1,0 +1,181 @@
+\documentclass[aspectratio=43]{beamer}
+%\documentclass[aspectratio=1610]{beamer}
+%\documentclass[aspectratio=169]{beamer}
+
+% @IMP@ \usepackage{pgfpages}
+% @IMP@ \pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+
+\usepackage{fixltx2e}
+
+\usepackage[english,french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+
+\usepackage{lmodern}
+
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{bookmark}
+\usepackage{graphicx}
+\usepackage{keystroke}
+\usepackage{marvosym}
+\usepackage{siunitx}
+\usepackage{tabularx}
+\usepackage{tabulary}
+\usepackage{tikz}
+\usepackage{xspace}
+
+\usepackage{LPI}
+
+% beamer
+
+\usetheme[formation]{Linagora}
+
+\title{LPIC-1}
+\subtitle{Examen 101}
+
+%\setbeameroption{show notes}
+
+% array
+
+\setlength{\extrarowheight}{2pt}
+
+% babel
+
+\frenchbsetup{og=«,fg=»}
+
+\newcommand{\anglais}[1]{\textit{\foreignlanguage{english}{#1}}}
+
+% graphicx
+
+\graphicspath{{illustrations/}}
+
+% marvosym
+
+\newcommand{\curseur}{\Rectsteel}
+
+% siunitx
+
+\sisetup
+{
+	binary-units	= true ,
+}
+
+\DeclareSIUnit{\octet}{o}
+
+% tikz
+
+\usetikzlibrary{calc,decorations.pathmorphing}
+
+% LPI
+
+\LPIinit{101}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+\pdfbookmark[2]{\inserttitle\ -- \insertsubtitle}{titre}
+
+\titlepage
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Introduction}
+
+\pdfbookmark[2]{Introduction}{introduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\include{share/lpi-intro}
+\include{lpic-1}
+\include{share/lpi-examens}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{L'examen 101}
+
+\begin{itemize}
+
+\item Dure 1 h 30.
+
+\item Comprend 60 questions.
+
+\item Le score maximum est de 800.
+
+\item Un score de 500 est nécessaire pour réussir l'examen.
+
+\item C'est-à-dire 62,5 \% du score maximum soit environ 37,5 questions.
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{http://www.lpi.org/linux-certifications/programs/lpic-1/exam-101/}
+\toileurl{http://wiki.lpi.org/wiki/LPIC-1_Objectives(FR)\#Objectifs_de_l.27examen_LPI_101}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\include{share/precautions}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Bibliographie}
+
+\pdfbookmark[2]{Bibliographie}{bibliographie}
+
+\include{bibliographie-101}
+\include{bibliographie}
+\include{share/bibliographie}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Webographie}
+
+\pdfbookmark[2]{Webographie}{webographie}
+
+\include{webographie-101}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\include{share/examens-blancs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Sommaire}
+
+\pdfbookmark[2]{Sommaire}{sommaire}
+
+\begin{frame}{Sommaire}
+
+\tableofcontents[hideallsubsections]
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\include{101}
+\include{102}
+\include{103}
+\include{104}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Conclusion}
+
+\pdfbookmark[2]{Conclusion}{conclusion}
+
+\merci
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
