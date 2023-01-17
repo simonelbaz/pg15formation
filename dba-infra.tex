@@ -1,6 +1,6 @@
-\documentclass[aspectratio=43]{beamer}
+%\documentclass[aspectratio=43]{beamer}
 %\documentclass[aspectratio=1610]{beamer}
-%\documentclass[aspectratio=169]{beamer}
+\documentclass[aspectratio=169]{beamer}
 
 % @IMP@ \usepackage{pgfpages}
 % @IMP@ \pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
@@ -26,14 +26,15 @@
 \usepackage{tikz}
 \usepackage{xspace}
 
-\usepackage{LPI}
+\usepackage{formation}
 
 % beamer
 
-\usetheme[formation]{Linagora}
+%\usetheme[formation]{Linagora}
+\usetheme{metropolis}
 
-\title{LPIC-1}
-\subtitle{Examen 101}
+\title{PostgreSQL}
+\subtitle{DBA Infrastructure}
 
 %\setbeameroption{show notes}
 
@@ -68,10 +69,6 @@
 
 \usetikzlibrary{calc,decorations.pathmorphing}
 
-% LPI
-
-\LPIinit{101}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
@@ -94,9 +91,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\include{share/lpi-intro}
-\include{lpic-1}
-\include{share/lpi-examens}
+\include{internals.tex}
+\include{pitr/pitr.tex}
+\include{monitoring.tex}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -125,17 +122,9 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\include{share/precautions}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section*{Bibliographie}
 
 \pdfbookmark[2]{Bibliographie}{bibliographie}
-
-\include{bibliographie-101}
-\include{bibliographie}
-\include{share/bibliographie}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -143,11 +132,9 @@
 
 \pdfbookmark[2]{Webographie}{webographie}
 
-\include{webographie-101}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\include{share/examens-blancs}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -163,18 +150,11 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\include{101}
-\include{102}
-\include{103}
-\include{104}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section*{Conclusion}
 
 \pdfbookmark[2]{Conclusion}{conclusion}
 
-\merci
+%\merci
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
