@@ -60,7 +60,7 @@ Il existe différents types de sauvegarde:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Mise en place de la génération des WAL (1/2)}
+\begin{frame}[fragile]{Mise en place de la génération des WAL}
 
 \begin{itemize}
 
@@ -164,25 +164,179 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{\path{/dev}}
+\begin{frame}{Options de la commande \commande{pg\_basebackup}}
+
+   Les options qui semblent les plus intéressantes sont:
 
 \begin{itemize}
 
-\item Le pseudo-système de fichiers \path{/dev} contient les fichiers spéciaux
-permettant l'accès au matériel.
-
-\item Ces fichiers spéciaux sont adaptés au matériel détecté par le noyau lors
-de son démarrage et les fichiers idoines sont créés ou supprimés dynamiquement
-par la suite en fonction du branchement ou du débranchement de périphériques.
-
-\item C'est un système nommé « udev », dont le fonctionnement est réparti entre
-le noyau et un daemon, qui gère le pseudo-système de fichiers \path{/dev}. Il
-est au programme de l'examen 201.
+   \item \option{-F \textit{format}}
+   \item \textit{format} a les valeurs suivantes:
+   \begin{itemize}
+      \item  \textit{p} ou \textit{plain}. Format par défaut. 
+      \item  \textit{t} ou \textit{tar}. Génération d'une archive du répertoire des données \textit{base.tar}
+   \end{itemize}
 
 \end{itemize}
 
 \begin{toile}
-\toileurl{http://fr.wikipedia.org/wiki/Udev}
+\toileurl{https://www.postgresql.org/docs/15/app-pgbasebackup.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Options de la commande \commande{pg\_basebackup}}
+
+\begin{itemize}
+   \item \option{-R} or \option{{-}{-}write-recovery-conf}
+   \begin{itemize}
+      \item la commande génère automatiquement le fichier \textbf{standby.signal}
+   \end{itemize}
+   \item \option{-T \textit{olddir}=\textit{newdir}} ou \option{{-}{-}tablespace-mapping=\textit{olddir}=\textit{newdir}}
+   \begin{itemize}
+      \item cette option permet de mapper les répertoires du serveur liés aux tablespaces à d'autres répertoires locaux. Option valide uniquement si le format \textbf{plain} est utilisé. 
+   \end{itemize}
+   \item \option{-X \textit{method}} ou \option{{-}{-}wal-method=\textit{method}}
+   \begin{itemize}
+   \item \textit{method} a les valeurs suivantes:
+      \begin{itemize}
+         \item  \textit{n} ou \textit{none}. Le backup n'inclut pas les WAL.
+         \item  \textit{f} ou \textit{fetch}. Les WAL générés durant le backup sont récupérés une fois le backup généré. Dans le cas de l'utilisation de cette option, le paramètre \option{wal\_keep\_size} nécessite d'être ajusté correctement afin que le serveur puisse garder l'ensemble des WAL (et ne supprime ni n'en recycle durant le backup).
+         \item  \textit{s} ou \textit{stream}. Mode par défaut. Une $2^{\grave{e}me}$ connexion est établie vers le serveur pour streamer les WAL générés durant le backup.
+      \end{itemize}
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Options de la commande \commande{pg\_basebackup}}
+
+\begin{itemize}
+   \item \option{{-}{-}no-estimate-size}
+   \begin{itemize}
+      \item le serveur n'estime plus la taille du backup avant de débuter le process. Cela permet de raccourcir la durée de la génération du backup.
+   \end{itemize}
+
+\item{\textbf{Environment}}
+   \begin{itemize}
+      \item Cet utilitaire, tout comme la majorité des utilitaires PostgreSQL, utilisent les mêmes variables d'environnement que ceux de la libpq.
+      \item The environment variable PG\_COLOR specifies whether to use color in diagnostic messages. Possible values are \textsl{always}, \textsl{auto} and \textsl{never}.
+      \item La variable d'environment PG\_COLOR indique si la couleur est utilisée dans les messages de diagnostique. Les valeurs possibles sont \textsl{always}, \textsl{auto} et \textsl{never}.
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{La commande \commande{pg\_verifybackup}}
+
+\begin{itemize}
+
+   \item La commande \commande{pg\_verifybackup} vérifie l'intégrité d'une sauvegarde générée par la commande \commande{pg\_basebackup}
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/app-pgverifybackup.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{La commande \commande{pg\_amcheck}}
+
+\begin{itemize}
+
+   \item La commande \commande{pg\_amcheck} vérifie l'intégrité d'une base de données.
+   \item Fait appel à l'utilitaire \textsf{amcheck}
+   \item S'applique aux tables ordinaires, celles de type TOAST, les vues matérialisées, les séquences, les indexes btree.
+   \item Possède des options de filtrages de base, de schéma et de table
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/app-pgamcheck.html}
+\toileurl{https://www.postgresql.org/docs/current/amcheck.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Principales options de la commande \commande{pg\_amcheck}}
+
+   Les principales options de cette commande sont:
+
+\begin{itemize}
+
+   \item \option{{-}{-}no-dependent-indexes} exclut de la vérification les indexes associés à la table
+   \item \option{{-}{-}no-dependent-toast} exclut de la vérification les tables TOAST associées à la table
+   \item Options applicables aux indexes
+
+   \begin{itemize}
+      \item \option{{-}{-}heapallindexed} crée un nouvel index temporaire en mémoire pour vérifier que l'index actuellement stocké est valide. Cette option utilise de la RAM limitée par le paramètre \option{maintenance\_work\_mem}
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Options de la commande \commande{pg\_basebackup}}
+
+\begin{itemize}
+   \item \option{{-}{-}parent-check} vérifie les indexes de la table parent\footnote{https://www.postgresql.org/docs/current/ddl-inherit.html}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Exercice: Réaliser un PITR}
+
+\begin{itemize}
+   \item Vérifier que PostgreSQL est déployé sur le serveur \textsf{hqpg-0x}
+   \item Mettre en place la copie des WAL vers le répertoire \path{/var/lib/pgsql/wal\_backup} avec le niveau \textsf{replica}
+   \item Sur \textsf{hqpg-0x-repl} réaliser une sauvegarde avec la commande \commande{pg\_basebackup}
+   \begin{itemize}
+      \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /usr/local/pgsql/data}
+   \end{itemize}
+   \item Créer les tables pitr1 puis pitr2
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Exercice: Réaliser un PITR}
+
+\begin{itemize}
+   \item Vérifier que les 2 créations précédentes sont présentes dans les WAL archivés
+   \item Décrire la manip ...
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Supervision de la base de données}
+
+   TODO
+
+\begin{itemize}
+
+   \item TODO
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/monitoring.html}
 \end{toile}
 
 \end{frame}
