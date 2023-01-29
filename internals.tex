@@ -288,7 +288,7 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Options de la commande \commande{pg\_basebackup}}
+\begin{frame}{Options de la commande \commande{pg\_amcheck}}
 
 \begin{itemize}
    \item \option{{-}{-}parent-check} vérifie les indexes de la table parent\footnote{https://www.postgresql.org/docs/current/ddl-inherit.html}
@@ -298,27 +298,69 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Exercice: Réaliser un PITR}
+\begin{frame}{Réalisation d'un backup de la base de données}
 
+Il existe 2 méthodes pour réaliser une sauvegarde de la base données:
 \begin{itemize}
-   \item Vérifier que PostgreSQL est déployé sur le serveur \textsf{hqpg-0x}
-   \item Mettre en place la copie des WAL vers le répertoire \path{/var/lib/pgsql/wal\_backup} avec le niveau \textsf{replica}
-   \item Sur \textsf{hqpg-0x-repl} réaliser une sauvegarde avec la commande \commande{pg\_basebackup}
-   \begin{itemize}
-      \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /usr/local/pgsql/data}
-   \end{itemize}
-   \item Créer les tables pitr1 puis pitr2
+   \item l'outil \textsf{pg\_basebackup}
+   \item l'API bas niveau avec des appels aux fonctions PostgreSQL
 \end{itemize}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Exercice: Réaliser un PITR}
+\begin{frame}{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
 
 \begin{itemize}
-   \item Vérifier que les 2 créations précédentes sont présentes dans les WAL archivés
-   \item Décrire la manip ...
+   \item Vérifier que PostgreSQL est déployé sur le serveur \textsf{hqpg-0x}
+   \item Mettre en place la copie des WAL vers le répertoire \path{/var/lib/pgsql/wal\_backup} avec le niveau \textsf{replica}
+   \item Sur \textsf{hqpg-0x-repl} réaliser une sauvegarde avec la commande \commande{pg\_basebackup}
+   \item La commande \textsf{archive\_command} s'appuie sur rsync pour transférer les WALs depuis le primaire. Pour éviter d'avoir à indiquer le mot de l'utilisater postgres, réaliser la génération et l'échange mutuel de clefs SSH sur les 2 serveurs comme décrit en page ~\ref{sec:ssh-keys}
+
+
+   \item Paramétrer la commande \textsf{archive\_command} dans postgresql.conf
+   \begin{itemize}
+      \item \commande{archive\_command = 'rsync \%p hqpg-0x-repl:/var/lib/wal\_backup/\%f'}
+   \end{itemize}
+\item Sur le serveur de sauvegarde, créer le répertoire \textsf{/var/lib/wal\_backup/} de sauvegarde des WALs avec l'utilisateur postgres
+   \item Créer la table \textsf{test\_pitr1}
+   \item Noter l'heure à la seconde. Cela permettra de choisir l'instant de restauration des archives.
+   \item Créer la table \textsf{test\_pitr2}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Génération et échange mutuel des clés SSH}
+\label{sec:ssh-keys}
+
+\begin{verbatim}
+[linagora@localhost ~]$ sudo -i
+[root@localhost ~]# su - postgres
+[postgres@localhost ~]$ ssh-keygen 
+Generating public/private rsa key pair.
+Enter file in which to save the key (/var/lib/pgsql/.ssh/id_rsa): 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+\end{verbatim}
+
+\begin{itemize}
+   \item Copier la clef publique dans le répertoire $\sim/postgres/.ssh/authorized\_keys$
+   \item Vérifier avec la commande ssh \textsf{postgres@hqpg-0x-repl} et inversement que la session SSH est établie sans avoir à fournir de mot de passe
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+
+\begin{itemize}
+   \item Comme indiqué dans\footnote{https://www.postgresql.org/docs/current/app-pgbasebackup.html}, la commande \textsf{pg\_basebackup} réalise un checkpoint sur le serveur
+   \item Les 2 tables précédemment créées sont donc présentes dans la sauvegarde
+   \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /usr/local/pgsql/data}
 \end{itemize}
 
 \end{frame}
