@@ -314,20 +314,52 @@ Il existe 2 méthodes pour réaliser une sauvegarde de la base données:
 
 \begin{itemize}
    \item Vérifier que PostgreSQL est déployé sur le serveur \textsf{hqpg-0x}
-   \item Mettre en place la copie des WAL vers le répertoire \path{/var/lib/pgsql/wal\_backup} avec le niveau \textsf{replica}
+   \item Mettre en place la copie des WAL vers le répertoire \path{/opt/wal\_backup} avec le niveau \textsf{replica}
    \item Sur \textsf{hqpg-0x-repl} réaliser une sauvegarde avec la commande \commande{pg\_basebackup}
    \item La commande \textsf{archive\_command} s'appuie sur rsync pour transférer les WALs depuis le primaire. Pour éviter d'avoir à indiquer le mot de l'utilisater postgres, réaliser la génération et l'échange mutuel de clefs SSH sur les 2 serveurs comme décrit en page ~\ref{sec:ssh-keys}
 
 
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+
+\begin{itemize}
    \item Paramétrer la commande \textsf{archive\_command} dans postgresql.conf
    \begin{itemize}
-      \item \commande{archive\_command = 'rsync \%p hqpg-0x-repl:/var/lib/wal\_backup/\%f'}
+      \item \commande{archive\_command = 'rsync \%p hqpg-0x-repl:/opt/wal\_backup/\%f'}
    \end{itemize}
-\item Sur le serveur de sauvegarde, créer le répertoire \textsf{/var/lib/wal\_backup/} de sauvegarde des WALs avec l'utilisateur postgres
-   \item Créer la table \textsf{test\_pitr1}
-   \item Noter l'heure à la seconde. Cela permettra de choisir l'instant de restauration des archives.
-   \item Créer la table \textsf{test\_pitr2}
+
+   \item Sur le serveur de sauvegarde, créer le répertoire \textsf{/opt/wal\_backup/} de sauvegarde des WALs avec l'utilisateur postgres
 \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+
+   Sur le serveur principal, lancer les commandes suivantes:
+%   \item Créer la base de données \textsf{formation\_hq}
+%   \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /usr/local/pgsql/data}
+%   \item Créer la table \textsf{test\_pitr1}
+%   \item Noter l'heure à la seconde. Cela permettra de choisir l'instant de restauration des archives.
+%   \item Créer la table \textsf{test\_pitr2}
+
+\begin{verbatim}
+su - postgres
+creatuser hq -d
+psql
+\end{verbatim}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/app-createuser.html}
+\toileurl{https://www.postgresql.org/docs/current/app-createdb.html}
+\end{toile}
+
 
 \end{frame}
 
