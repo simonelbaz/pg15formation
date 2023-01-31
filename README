@@ -1,0 +1,6 @@
+# Commande de génération du dvi
+
+```
+latexmk --output-directory=dba-infra dba-infra.tex && dvipdf dba-infra/dba-infra.dvi
+```
+
