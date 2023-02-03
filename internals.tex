@@ -340,19 +340,21 @@ Il existe 2 méthodes pour réaliser une sauvegarde de la base données:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]\frametitle{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+\begin{frame}[fragile]\frametitle{Création du jeu de données}
 
-   Sur le serveur principal, lancer les commandes suivantes:
-%   \item Créer la base de données \textsf{formation\_hq}
-%   \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /usr/local/pgsql/data}
-%   \item Créer la table \textsf{test\_pitr1}
-%   \item Noter l'heure à la seconde. Cela permettra de choisir l'instant de restauration des archives.
-%   \item Créer la table \textsf{test\_pitr2}
+Sur le serveur principal, lancer les commandes suivantes:
 
 \begin{verbatim}
 su - postgres
 creatuser hq -d
-psql
+createdb hqdb -O hq
+psql hqdb
+-- 16h27
+create table test\_pitr1 (col1 text);
+create table test\_pitr2 (col1 text);
+-- quelques minutes plus tard
+-- 16h30
+create table test\_pitr3 (col1 text);
 \end{verbatim}
 
 \begin{toile}
@@ -360,6 +362,59 @@ psql
 \toileurl{https://www.postgresql.org/docs/current/app-createdb.html}
 \end{toile}
 
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+
+Sur le serveur principal, ajouter la ligne suivante dans pg\_hba.conf:
+
+\begin{verbatim}
+host    replication     postgres        10.10.10.0/24           trust
+\end{verbatim}
+
+Recharger le paramétrage avec la commande suivante:
+\begin{verbatim}
+postgres=# SELECT pg_reload_conf();
+\end{verbatim}
+
+Sur le serveur de sauvegarde des WAL, appliquer les commandes suivantes:
+
+\begin{itemize}
+   \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /opt/backup/20230213}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Inspection de l'archive générée}
+
+\begin{verbatim}
+[postgres@localhost 20230202_1]$ ls -lrt
+total 4420
+-rw------- 1 postgres postgres  181880  2 févr. 07:58 backup_manifest
+-rw------- 1 postgres postgres 4321056  2 févr. 07:58 base.tar.gz
+-rw------- 1 postgres postgres   17075  2 févr. 07:58 pg_wal.tar.gz
+\end{verbatim}
+
+\begin{itemize}
+   \item backup\_manifest inclut le listing avec les checkum de l'archive base.tar.gz
+   \item pg\_wal.tar.gz inclut les WAL générés durant l'opération du pg\_basebackup
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Restauration de la base de données juste avant la création de la table test\_pitr3}
+
+\begin{itemize}
+   \item backup\_manifest inclut le listing avec les checkum de l'archive base.tar.gz
+   \item pg\_wal.tar.gz inclut les WAL générés durant l'opération du pg\_basebackup
+\end{itemize}
 
 \end{frame}
 
@@ -414,6 +469,24 @@ Enter same passphrase again:
 \end{toile}
 
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{En cas de corruption des WALs}
+
+\begin{itemize}
+
+   \item If recovery finds corrupted WAL data, recovery will halt at that point and the server will not start. In such a case the recovery process could be re-run from the beginning, specifying a “recovery target” before the point of corruption so that recovery can complete normally.    \item If recovery fails for an external reason, such as a system crash or if the WAL archive has become inaccessible, then the recovery can simply be restarted and it will restart almost from where it failed. 
+   \item Recovery restart works much like checkpointing in normal operation: the server periodically forces all its state to disk, and then updates the pg\_control file to indicate that the already-processed WAL data need not be scanned again.
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/continuous-archiving.html}
+\end{toile}
+
+\end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
