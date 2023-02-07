@@ -1,8 +1,6 @@
-\section{PostgreSQL Internals}
+\section{Point In Time Recovery}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{Point in Time Recovery}
+\subsectionpage{Internals}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -143,12 +141,54 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Timelines (lignes de temps)}
+
+\begin{itemize}
+
+   \item Après chaque opération de recovery, PostgreSQL créée une nouvelle ligne de temps (timeline)
+   \item Au passage, le serveur crée un fichier "timeline history" qui lui indique la série de WAL générés après le recovery
+   \item Les WALs créés après l'opération de recovery appartiennent à cette nouvelle ligne de temps
+   \item Par défaut, l'opération de recovery rétablit la timeline la plus récente
+   \item Il est possible de rétablir une timeline donnée dans le passé
+
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/continuous-archiving.html}
+\end{toile}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Format du nom du WAL}
+
+   Dans le répertoire /pg\_wal, on peut voir le WAL suivant:
+
+\begin{itemize}
+
+   \item 00000001000000000000001B
+   \item La timeline est représentée par les 8 premiers chiffres du nom du WAL
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/continuous-archiving.html}
+\end{toile}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{La commande \commande{pg\_basebackup}}
 
 \begin{itemize}
 
 \item La commande \commande{pg\_basebackup} sauvegarde un cluster PostgreSQL
-\item Elle ne s'applique sur une base de données en particulier
+\item Elle ne s'applique pas sur une base de données en particulier
 \item L'utilisateur lançant cette commande doit posséder le droit \textbf{REPLICATION} ou être un super-utilisateur
 \item La commande peut être lancée sur un serveur standby
 \item La table \textit{pg\_stat\_progress\_basebackup} donne une idée de la progression de la commande
@@ -224,10 +264,24 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 \item{\textbf{Environment}}
    \begin{itemize}
       \item Cet utilitaire, tout comme la majorité des utilitaires PostgreSQL, utilisent les mêmes variables d'environnement que ceux de la libpq.
-      \item The environment variable PG\_COLOR specifies whether to use color in diagnostic messages. Possible values are \textsl{always}, \textsl{auto} and \textsl{never}.
       \item La variable d'environment PG\_COLOR indique si la couleur est utilisée dans les messages de diagnostique. Les valeurs possibles sont \textsl{always}, \textsl{auto} et \textsl{never}.
    \end{itemize}
 \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Checkpoints}
+   \label{checkpoint}
+
+\begin{itemize}
+   \item checkpoint
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/wal-configuration.html}
+\end{toile}
 
 \end{frame}
 
@@ -238,6 +292,7 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 \begin{itemize}
 
    \item La commande \commande{pg\_verifybackup} vérifie l'intégrité d'une sauvegarde générée par la commande \commande{pg\_basebackup}
+   \item Elle s'applique sur un backup généré au format plain. Dans le cas de la vérification d'une archive tar, il est nécessaire de désarchiver auparavant.
 
 \end{itemize}
 
@@ -298,26 +353,41 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Réalisation d'un backup de la base de données}
+\subsectionpage{Exercice}
 
-Il existe 2 méthodes pour réaliser une sauvegarde de la base données:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Réalisation d'un backup full de la base de données}
+
+La procédure de déroulement du PITR s'appuie sur:
+\begin{itemize}
+   \item la génération d'un backup full
+   \item l'archivage des WALs
+\end{itemize}
+
+
+Il existe 2 méthodes pour réaliser une sauvegarde full de la base données:
 \begin{itemize}
    \item l'outil \textsf{pg\_basebackup}
    \item l'API bas niveau avec des appels aux fonctions PostgreSQL
 \end{itemize}
 
+La méthode étudiée pendant les exercices est l'outil \textsf{pg\_basebackup}.
+
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+\begin{frame}[fragile]\frametitle{Mise en place de l'archivage des WALs}
 
 \begin{itemize}
-   \item Vérifier que PostgreSQL est déployé sur le serveur \textsf{hqpg-0x}
-   \item Mettre en place la copie des WAL vers le répertoire \path{/opt/wal\_backup} avec le niveau \textsf{replica}
-   \item Sur \textsf{hqpg-0x-repl} réaliser une sauvegarde avec la commande \commande{pg\_basebackup}
-   \item La commande \textsf{archive\_command} s'appuie sur rsync pour transférer les WALs depuis le primaire. Pour éviter d'avoir à indiquer le mot de l'utilisater postgres, réaliser la génération et l'échange mutuel de clefs SSH sur les 2 serveurs comme décrit en page ~\ref{sec:ssh-keys}
-
+   \item Vérifier que PostgreSQL est déployé sur les serveurs \textsf{hqpg-0x} et \textsf{hqpg-0x-repl}
+   \item Mettre en place la copie des WAL vers le répertoire \path{/opt/wal_backup} avec le niveau \textbf{replica}
+   \item La commande \textsf{archive\_command} s'appuie sur rsync pour transférer les WALs depuis le primaire. Pour éviter d'avoir à indiquer le mot de l'utilisateur postgres, réaliser la génération et l'échange mutuel de clefs SSH sur les 2 serveurs comme décrit en page ~\ref{sec:ssh-keys}
+   \item Paramétrer la commande \textsf{archive\_command} dans postgresql.conf
+   \begin{tiny}
+      \item \commande{archive\_command = 'rsync \%p hqpg-0x-repl:/opt/wal\_backup/\%f'}
+   \end{tiny}
 
 \end{itemize}
 
@@ -325,15 +395,88 @@ Il existe 2 méthodes pour réaliser une sauvegarde de la base données:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+\begin{frame}[fragile]\frametitle{Résumé du paramétrage de la sauvegarde des WALs}
+
+Sur le serveur principal, les lignes suivantes sont inclues dans postgresql.conf:
+\begin{tiny}
+\begin{verbatim}
+# Add settings for extensions here
+listen_addresses = '*'
+wal_level = replica
+archive_mode = on
+archive_command = 'rsync %p 10.10.10.29:/opt/archivedir/%f'
+\end{verbatim}
+\end{tiny}
 
 \begin{itemize}
-   \item Paramétrer la commande \textsf{archive\_command} dans postgresql.conf
-   \begin{itemize}
-      \item \commande{archive\_command = 'rsync \%p hqpg-0x-repl:/opt/wal\_backup/\%f'}
-   \end{itemize}
+   \item Sur le serveur de sauvegarde, créer le répertoire \path{/opt/wal_backup/} de sauvegarde des WALs avec l'utilisateur postgres
+\end{itemize}
 
-   \item Sur le serveur de sauvegarde, créer le répertoire \textsf{/opt/wal\_backup/} de sauvegarde des WALs avec l'utilisateur postgres
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Remarque importante sur la procédure de PITR}
+
+\begin{small}
+   \textbf{Remarque} Le point de restauration est obligatoirement après la date de fin du base backup, c'est à dire, le temps de fin de l'appel à pg\_basebackup\_stop. Il n'est possible de restaurer des données à une date durant laquelle le backup est en cours.
+Pour restaurer à une telle date, il est nécessaire de restaurer le précédent backup et de rejouer les sauvegardes WALs jusqu'à ce point.
+\end{small}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+
+Sur le serveur principal, ajouter la ligne suivante dans pg\_hba.conf:
+
+\begin{tiny}
+\begin{verbatim}
+host  replication  postgres   10.10.10.0/24  trust
+\end{verbatim}
+\end{tiny}
+
+Recharger le paramétrage avec la commande suivante:
+
+\begin{tiny}
+\begin{verbatim}
+postgres=# SELECT pg_reload_conf();
+\end{verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Génération d'un backup full}
+
+Sur le serveur de sauvegarde des WAL, appliquer les commandes suivantes:
+
+\begin{itemize}
+   \item Comme indiqué dans\footnote{https://www.postgresql.org/docs/current/app-pgbasebackup.html}, la commande \textsf{pg\_basebackup} réalise un checkpoint (p. \ref{checkpoint}) sur le serveur
+   \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /opt/backup/20230213}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Inspection de l'archive générée}
+
+\begin{tiny}
+\begin{verbatim}
+[postgres@localhost 20230202_1]$ ls -lrt
+total 4420
+-rw------- 1 postgres postgres  181880  2 févr. 07:58 backup_manifest
+-rw------- 1 postgres postgres 4321056  2 févr. 07:58 base.tar.gz
+-rw------- 1 postgres postgres   17075  2 févr. 07:58 pg_wal.tar.gz
+\end{verbatim}
+\end{tiny}
+
+\begin{itemize}
+   \item backup\_manifest inclut le listing avec les checkum de l'archive base.tar.gz
+   \item pg\_wal.tar.gz inclut les WAL générés durant l'opération du pg\_basebackup
 \end{itemize}
 
 \end{frame}
@@ -344,18 +487,20 @@ Il existe 2 méthodes pour réaliser une sauvegarde de la base données:
 
 Sur le serveur principal, lancer les commandes suivantes:
 
+\begin{tiny}
 \begin{verbatim}
 su - postgres
 creatuser hq -d
 createdb hqdb -O hq
 psql hqdb
--- 16h27
-create table test\_pitr1 (col1 text);
-create table test\_pitr2 (col1 text);
+-- 02/02/2023 16h27
+create table test_pitr1 (col1 text);
+create table test_pitr2 (col1 text);
 -- quelques minutes plus tard
 -- 16h30
-create table test\_pitr3 (col1 text);
+create table test_pitr3 (col1 text);
 \end{verbatim}
+\end{tiny}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/current/app-createuser.html}
@@ -367,54 +512,115 @@ create table test\_pitr3 (col1 text);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]\frametitle{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
+\begin{frame}[fragile]\frametitle{Restauration de la base de données à une date donnée}
 
-Sur le serveur principal, ajouter la ligne suivante dans pg\_hba.conf:
+Sur le serveur PostgreSQL principal,
 
+\begin{tiny}
 \begin{verbatim}
-host    replication     postgres        10.10.10.0/24           trust
+[root@localhost 15]# systemctl stop postgresql-15.service
+[root@localhost 15]# su - postgres
+Dernière connexion : samedi  4 février 2023 à 20:01:48 EST sur pts/0
+[postgres@localhost ~]$ cd 15
+# mv data data.20230213
+# scp 10.10.10.29:/opt/backup/20230205_1/* .
+# rm -rf data && mkdir data && chmod 0700 data
+# tar xvzf ../base.tar.gz 
+# cd pg_wal/
+# tar xvzf ../../pg_wal.tar.gz 
+#  cd ..
+#  touch recovery.signal
 \end{verbatim}
+\end{tiny}
 
-Recharger le paramétrage avec la commande suivante:
-\begin{verbatim}
-postgres=# SELECT pg_reload_conf();
-\end{verbatim}
-
-Sur le serveur de sauvegarde des WAL, appliquer les commandes suivantes:
-
-\begin{itemize}
-   \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /opt/backup/20230213}
-\end{itemize}
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-wal.html\#RUNTIME-CONFIG-WAL-RECOVERY-TARGET}
+\end{toile}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]\frametitle{Inspection de l'archive générée}
+\begin{frame}[fragile]\frametitle{Restauration de la base de données à une date donnée}
 
+Ajouter les lignes suivantes dans postgresql.conf
+
+\begin{tiny}
 \begin{verbatim}
-[postgres@localhost 20230202_1]$ ls -lrt
-total 4420
--rw------- 1 postgres postgres  181880  2 févr. 07:58 backup_manifest
--rw------- 1 postgres postgres 4321056  2 févr. 07:58 base.tar.gz
--rw------- 1 postgres postgres   17075  2 févr. 07:58 pg_wal.tar.gz
+restore_command = 'rsync 10.10.10.29:/opt/archivedir/%f %p'
+recovery_target_time = '2023-02-05 02:20:00+01'
 \end{verbatim}
+\end{tiny}
 
-\begin{itemize}
-   \item backup\_manifest inclut le listing avec les checkum de l'archive base.tar.gz
-   \item pg\_wal.tar.gz inclut les WAL générés durant l'opération du pg\_basebackup
-\end{itemize}
+Démarrer le serveur avec la commande.
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]\frametitle{Restauration de la base de données juste avant la création de la table test\_pitr3}
+\begin{frame}[fragile]\frametitle{Logs de la restauration}
 
-\begin{itemize}
-   \item backup\_manifest inclut le listing avec les checkum de l'archive base.tar.gz
-   \item pg\_wal.tar.gz inclut les WAL générés durant l'opération du pg\_basebackup
-\end{itemize}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+rsync: link_stat "/opt/archivedir/00000002.history" failed: No such file or directory (2)
+rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1670) [Receiver=3.1.3]
+2023-02-04 20:28:02.203 EST [22385] LOG:  début de la restauration de l'archive à \userinput{2023-02-04 20:20:00-05}
+2023-02-04 20:28:03.278 EST [22385] LOG:  la ré-exécution commence à 0/1C000028
+2023-02-04 20:28:03.648 EST [22385] LOG:  restauration du journal de transactions « 00000001000000000000001D » à partir de l'archive
+2023-02-04 20:28:05.011 EST [22385] LOG:  état de restauration cohérent atteint à 0/1C000100
+2023-02-04 20:28:05.011 EST [22381] LOG:  le système de bases de données est prêt pour accepter les connexions en lecture seule
+rsync: link_stat "/opt/archivedir/00000001000000000000001F" failed: No such file or directory (2)
+2023-02-04 20:28:05.172 EST [22385] LOG:  arrêt de la restauration avant validation de la transaction 740, 2023-02-04 20:21:11.941687-05
+2023-02-04 20:28:05.172 EST [22385] LOG:  pause à la fin de la restauration
+2023-02-04 20:28:05.172 EST [22385] \userinput{ASTUCE :  Exécuter pg_wal_replay_resume() pour promouvoir.}
+2023-02-04 20:33:01.702 EST [22383] LOG:  début du restartpoint : time
+2023-02-04 20:33:05.828 EST [22383] LOG:  restartpoint terminé : a écrit 26 tampons (0.2%); 0 fichiers WAL ajoutés, 2 supprimés, 0 recyclés ; écriture=3.090 s, synchronisation=0.610 s, total=4.127 s; fichiers synchronisés=18, plus long=0.609 s, moyenne=0.034 s; distance=32768 kB, estimation=32768 kB
+2023-02-04 20:33:05.829 EST [22383] LOG:  la ré-exécution en restauration commence à 0/1E000028
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Basculement de la base de données en mode écriture}
+
+\begin{tiny}
+\begin{verbatim}
+hqdb=# create table test_pitr_20230206144000 (col1 text);
+ERREUR:  ne peut pas exécuter CREATE TABLE dans une transaction en lecture seule
+hqdb=# quit
+[postgres@localhost pg_wal]$ psql
+psql (15.1)
+Saisissez « help » pour l'aide.
+
+postgres=# select pg_wal_replay_resume();
+ pg_wal_replay_resume 
+----------------------
+ 
+(1 ligne)
+
+postgres=# create table test_pitr_20230206144000 (col1 text);
+CREATE TABLE
+\end{verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]\frametitle{Apparition d'une nouvelle ligne de temps}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[postgres@localhost pg_wal]$ ls -lrt
+total 32772
+-rw------- 1 postgres postgres 16777216  6 févr. 08:41 00000001000000000000001E
+\userinput{-rw------- 1 postgres postgres       51  6 févr. 08:41 00000002.history}
+drwx------ 2 postgres postgres       72  6 févr. 08:41 archive_status
+\userinput{-rw------- 1 postgres postgres 16777216  6 févr. 08:46 00000002000000000000001E}
+\end{Verbatim}
+\end{tiny}
 
 \end{frame}
 
@@ -423,6 +629,7 @@ total 4420
 \begin{frame}[fragile]\frametitle{Génération et échange mutuel des clés SSH}
 \label{sec:ssh-keys}
 
+\begin{tiny}
 \begin{verbatim}
 [linagora@localhost ~]$ sudo -i
 [root@localhost ~]# su - postgres
@@ -432,6 +639,7 @@ Enter file in which to save the key (/var/lib/pgsql/.ssh/id_rsa):
 Enter passphrase (empty for no passphrase): 
 Enter same passphrase again: 
 \end{verbatim}
+\end{tiny}
 
 \begin{itemize}
    \item Copier la clef publique dans le répertoire $\sim/postgres/.ssh/authorized\_keys$
@@ -442,41 +650,12 @@ Enter same passphrase again:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Utilisation de \textsf{pg\_basebackup} pour sauvegarder la base de données}
-
-\begin{itemize}
-   \item Comme indiqué dans\footnote{https://www.postgresql.org/docs/current/app-pgbasebackup.html}, la commande \textsf{pg\_basebackup} réalise un checkpoint sur le serveur
-   \item Les 2 tables précédemment créées sont donc présentes dans la sauvegarde
-   \item \commande{pg\_basebackup -h hqpg-0x -Ft -z -P -D /usr/local/pgsql/data}
-\end{itemize}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}[fragile]{Supervision de la base de données}
-
-   TODO
-
-\begin{itemize}
-
-   \item TODO
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{https://www.postgresql.org/docs/15/monitoring.html}
-\end{toile}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \begin{frame}[fragile]{En cas de corruption des WALs}
 
 \begin{itemize}
 
-   \item If recovery finds corrupted WAL data, recovery will halt at that point and the server will not start. In such a case the recovery process could be re-run from the beginning, specifying a “recovery target” before the point of corruption so that recovery can complete normally.    \item If recovery fails for an external reason, such as a system crash or if the WAL archive has become inaccessible, then the recovery can simply be restarted and it will restart almost from where it failed. 
+   \item If recovery finds corrupted WAL data, recovery will halt at that point and the server will not start. In such a case the recovery process could be re-run from the beginning, specifying a “recovery target” before the point of corruption so that recovery can complete normally.
+   \item If recovery fails for an external reason, such as a system crash or if the WAL archive has become inaccessible, then the recovery can simply be restarted and it will restart almost from where it failed. 
    \item Recovery restart works much like checkpointing in normal operation: the server periodically forces all its state to disk, and then updates the pg\_control file to indicate that the already-processed WAL data need not be scanned again.
 
 \end{itemize}
@@ -487,7 +666,6 @@ Enter same passphrase again:
 
 \end{frame}
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newlength{\largeurtableau}
@@ -495,126 +673,3 @@ Enter same passphrase again:
 \addtolength{\largeurtableau}{-2\leftmarginii}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{\path{/proc}}
-
-\begin{itemize}
-
-\item Le pseudo-système de fichiers \path{/proc} contient :
-
-	\begin{itemize}
-
-	\item un répertoire par processus, nommé selon son PID
-
-	\item un lien symbolique \path{self} pointant vers le répertoire
-	correspondant au processus courant
-
-	\item divers fichiers contenant des informations générales, par
-	exemple :
-
-\bigskip
-
-\begin{tabulary}{\largeurtableau}{lJ}
-\hline
-\path{/proc/cmdline}	& paramètres passés au noyau par le chargeur
-				d'amorçage		\\
-\path{/proc/cpuinfo}	& microprocesseur(s)		\\
-\path{/proc/interrupts}	& interruptions			\\
-\path{/proc/loadavg}	& charge moyenne		\\
-\path{/proc/meminfo}	& utilisation de la mémoire	\\
-\hline
-\end{tabulary}
-
-	\end{itemize}
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{http://fr.wikipedia.org/wiki/Procfs}
-\end{toile}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}[fragile]{\path{/sys}}
-
-\begin{itemize}
-
-\item Le pseudo-système de fichiers \path{/sys} fournit de nombreuses
-informations concernant le matériel et les pilotes.
-
-\item Exemple :
-
-\begin{intercom}
-\$ cat /sys/class/net/eth0/address
-00:1c:23:30:20:13
-\end{intercom}
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{http://fr.wikipedia.org/wiki/Sysfs}
-\end{toile}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{Démarrage du système}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% TODO démarrage single user
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% TODO Provide common commands to the boot loader and options to the kernel at boot time.
-% TODO Demonstrate knowledge of the boot sequence from BIOS to boot completion.
-% TODO Check boot events in the log files.
-
-% TODO /var/log/messages
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{Changement de niveaux d'exécution et arrêt ou redémarrage du système}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Les commandes \commande{halt}, \commande{poweroff} et
-\commande{reboot}}
-
-\begin{itemize}
-
-\item Équivalentes à la commande \commande{shutdown} utilisée avec certaines
-options :
-
-\bigskip
-
-\begin{tabular}{|l|l|}
-\hline
-\commande{halt}		& \commande{shutdown} \option{-H}	\\
-\hline
-\commande{poweroff}	& \commande{shutdown} \option{-P}	\\
-\hline
-\commande{reboot}	& \commande{shutdown} \option{-r}	\\
-\hline
-\end{tabular}
-
-\bigskip
-
-\item Contrairement à \commande{shutdown}, ces commandes ne permettent
-d'indiquer ni de délai (elles ont un effet immédiat) ni de message pour les
-utilisateurs connectés.
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{http://fr.wikipedia.org/wiki/Halt}
-\end{toile}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% TODO Knowledge of basic features of systemd and Upstart.

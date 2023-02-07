@@ -25,13 +25,17 @@
 \usepackage{tabulary}
 \usepackage{tikz}
 \usepackage{xspace}
+\usepackage{fancyvrb}
+
+\newcommand\userinput[1]{\textbf{#1}}
+\usepackage{tgcursor}
 
 \usepackage{formation}
 
 % beamer
 
 %\usetheme[formation]{Linagora}
-\usetheme{metropolis}
+\usetheme[progressbar=frametitle]{metropolis}
 
 \title{PostgreSQL}
 \subtitle{DBA Infrastructure}
@@ -85,40 +89,15 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section*{Introduction}
+%\section*{Introduction}
 
-\pdfbookmark[2]{Introduction}{introduction}
+%\pdfbookmark[2]{Introduction}{introduction}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \include{internals.tex}
-\include{pitr/pitr.tex}
+\include{optimisation.tex}
 \include{monitoring.tex}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{L'examen 101}
-
-\begin{itemize}
-
-\item Dure 1 h 30.
-
-\item Comprend 60 questions.
-
-\item Le score maximum est de 800.
-
-\item Un score de 500 est nécessaire pour réussir l'examen.
-
-\item C'est-à-dire 62,5 \% du score maximum soit environ 37,5 questions.
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{http://www.lpi.org/linux-certifications/programs/lpic-1/exam-101/}
-\toileurl{http://wiki.lpi.org/wiki/LPIC-1_Objectives(FR)\#Objectifs_de_l.27examen_LPI_101}
-\end{toile}
-
-\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
