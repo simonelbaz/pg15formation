@@ -276,11 +276,45 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
    \label{checkpoint}
 
 \begin{itemize}
-   \item checkpoint
+   \item A chaque checkpoint, l'ensemble des pages chargées et modifiées (\textsf{dirty pages}) dans les \textsf{shared\_buffers} sont flushées en disque.
+   \item Les données présentes dans les WAL sont également écrites en disque.
+   \item En cas de rejeu des WAL (\textbf{REDO}), le serveur part de la dernière transaction liée au checkpoint pour rejouer les WALs.
+   \item Cette opération engendre une forte activité I/O
+   \item La fréquence des checkpoint est liée à 2 paramètres:
+   \begin{itemize}
+      \item \textbf{checkpoint\_timeout}
+      \item \textbf{max\_wal\_size}
+   \end{itemize}
 \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/current/wal-configuration.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{\textbf{checkpoint\_timeout} et \textbf{max\_wal\_size}}
+
+   \textbf{checkpoint\_timeout}
+\begin{itemize}
+   \item Intervalle en secondes entre 2 checkpoints automatiques
+\end{itemize}
+
+   \textbf{max\_wal\_size}
+\begin{itemize}
+   \item Taille disque maximale occupée par les WAL. Lorsque cette taille est atteinte, l'opération de checkpoint est déclenchée ainsi que \textsf{archive\_command}.
+\end{itemize}
+
+   \textbf{min\_wal\_size}
+\begin{itemize}
+   \item Taille disque minimale occupée par les WAL. Lorsque ce seuil est atteint, les WAL ne sont plus supprimés mais recyclés (renommés).
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/runtime-config-wal.html\#GUC-CHECKPOINT-TIMEOUT}
+\toileurl{https://www.postgresql.org/docs/current/runtime-config-wal.html\#GUC-MAX-WAL-SIZE}
 \end{toile}
 
 \end{frame}
@@ -654,10 +688,9 @@ Enter same passphrase again:
 
 \begin{itemize}
 
-   \item If recovery finds corrupted WAL data, recovery will halt at that point and the server will not start. In such a case the recovery process could be re-run from the beginning, specifying a “recovery target” before the point of corruption so that recovery can complete normally.
-   \item If recovery fails for an external reason, such as a system crash or if the WAL archive has become inaccessible, then the recovery can simply be restarted and it will restart almost from where it failed. 
-   \item Recovery restart works much like checkpointing in normal operation: the server periodically forces all its state to disk, and then updates the pg\_control file to indicate that the already-processed WAL data need not be scanned again.
-
+   \item Dans le cas où l'opération de recovery détecte un WAL corrompu, l'opération s'interompt et le serveur ne démarre pas. Il est possible de relancer l'opération de recovery avec une cible de recovery située avant le point de corruption pour permettre à l'opération de se terminer.
+   \item Dans le cas où l'opération de recovery échoue pour une raison externe (crash système ou archive WAL inaccessible), le recovery peut être relancera. Il reprendra proche du point où il s'est interrompu.
+   \item Le redémarrage du mode recovery fonctionne de manière similaire au checkpoint en mode normal: le serveur enregistre son état de manière périodique en disque, puis met à jour le fichier pg\_control pour indiquer les WAL déjà traités et qui ne nécessitent pas d'être scannées à nouveau.
 \end{itemize}
 
 \begin{toile}
