@@ -1,0 +1,124 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Maintenance}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{EXPLAIN PLAN}
+
+   TODO
+   WIP
+
+\begin{toile}
+\toileurl{XXXX}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Tâches de maintenance de la base de données}
+
+   La base de données nécessite des opérations de maintenance régulière pour assurer un service optimal.
+   Les principales tâches de maintenance sont:
+   \begin{itemize}
+      \item Les sauvegardes régulières qui permettront de s'en sortir en cas d'accident grave
+      \item Les opérations de VACUUM
+      \item Les mises à jour des statistiques
+      \item Les mises à jour des indexes
+      \item La gestion des logs
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/maintenance.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Les opérations de VACUUM}
+
+   Les opérations de VACUUM sont lancées automatiquement par le démon \textsf{autovacuum}. Certains DBAs préfèrent gérer ce process eux-même à partir de tâches de type cron.
+   Les raisons principales pour lancer un VACUUM régulier sont:
+
+   \begin{itemize}
+      \item récupérer l'espace disque occupée pour des lignes mises à jour ou supprimées
+      \item mises à jour des statistiques utilisées par le planificateur de requêtes (query planner)
+      \item mises à jour du flag de visibilité pour améliorer la performance des indexes only scan (chapitre Optimisation)
+      \item protection contre la perte de données très anciennes causée par la rotation des identifiants de transaction ou de multi-transaction
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/routine-vacuuming.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Différents type de VACUUM}
+
+   Il existe 2 types de VACUUM:
+   \begin{itemize}
+      \item le VACUUM standard
+      \item le VACUUM FULL 
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{VACUUM standard}
+
+   \begin{itemize}
+      \item Le VACUUM standard peut être lancé en parallèle des commandes SQL (\textbf{SELECT}, \textbf{UPDATE}, \textbf{INSERT} et \textbf{DELETE})
+      \item la commande \textbf{ALTER TABLE} ne peut être exécutée sur une table en cours de traitement par le process
+      \item le VACUUM génère des I/O très importantes qui diminuent les performances des autres sessions actives
+      \item Il est possible de tempérer la charge I/O causée par le VACUUM par l'intermédiaire des paramètres: \textbf{vacuum\_cost\_*},
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Les paramètres \textbf{vacuum\_cost\_*}}
+
+   \begin{itemize}
+      \item Le VACUUM standard peut être lancé en parallèle des commandes SQL (\textbf{SELECT}, \textbf{UPDATE}, \textbf{INSERT} et \textbf{DELETE})
+      \item la commande \textbf{ALTER TABLE} ne peut être exécutée sur une table en cours de traitement par le process
+      \item le VACUUM génère des I/O très importantes qui diminuent les performances des autres sessions actives
+      \item Il est possible de tempérer la charge I/O causée par le VACUUM par l'intermédiaire des paramètres: \textbf{vacuum\_cost\_*},
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-resource.html\#RUNTIME-CONFIG-RESOURCE-VACUUM-COST}
+\end{toile}
+   
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{VACUUM FULL}
+
+   \begin{itemize}
+      \item Ce VACUUM recupère plus d'espace disque que le standard.
+      \item Il est cependant plus lent
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Tests de vérification de la bonne santé de la base}
+
+   TODO
+   WIP
+
+\begin{toile}
+\toileurl{https://bucardo.org/check\_postgres/}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
