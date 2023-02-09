@@ -43,7 +43,7 @@
    Les raisons principales pour lancer un VACUUM régulier sont:
 
    \begin{itemize}
-      \item récupérer l'espace disque occupée pour des lignes mises à jour ou supprimées
+      \item récupérer l'espace disque occupé pour des lignes mises à jour ou supprimées
       \item mises à jour des statistiques utilisées par le planificateur de requêtes (query planner)
       \item mises à jour du flag de visibilité pour améliorer la performance des indexes only scan (chapitre Optimisation)
       \item protection contre la perte de données très anciennes causée par la rotation des identifiants de transaction ou de multi-transaction
@@ -84,12 +84,16 @@
 
 \begin{frame}{Les paramètres \textbf{vacuum\_cost\_*}}
 
+   Lors de l'exécution des commandes VACUUM et ANALYZE, le serveur garde une trace des coûts I/O engendrés par ces opérations. Lorsque l'accumulation de ces coûts atteint un seuil paramétrable, le process en cours de VACUUM est mis en sommeil pour une durée paramétrable et les coûts sont remis à 0.
    \begin{itemize}
-      \item Le VACUUM standard peut être lancé en parallèle des commandes SQL (\textbf{SELECT}, \textbf{UPDATE}, \textbf{INSERT} et \textbf{DELETE})
-      \item la commande \textbf{ALTER TABLE} ne peut être exécutée sur une table en cours de traitement par le process
-      \item le VACUUM génère des I/O très importantes qui diminuent les performances des autres sessions actives
-      \item Il est possible de tempérer la charge I/O causée par le VACUUM par l'intermédiaire des paramètres: \textbf{vacuum\_cost\_*},
+      \item \textbf{vacuum\_cost\_delay}: durée de temps en millisecond pendant laquelle le process VACUUM sommeille
+      \item \textbf{vacuum\_cost\_page\_hit}: coût associé au traitement d'une page dans les shared\_buffers (1)
+      \item \textbf{vacuum\_cost\_page\_miss}: coût associé à une page en disque (2)
+      \item \textbf{vacuum\_cost\_page\_dirty}: coût associé à une page modifiée (dirty page). Elle va nécessiter un flush vers le disque et de l'I/O (20)
+      \item \textbf{vacuum\_cost\_limit}: seuil à partir duquel le process est mis en sommeil (200 par défaut)
    \end{itemize}
+
+   Les valeurs par défaut sont adaptées.
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/runtime-config-resource.html\#RUNTIME-CONFIG-RESOURCE-VACUUM-COST}
@@ -102,8 +106,35 @@
 \begin{frame}{VACUUM FULL}
 
    \begin{itemize}
-      \item Ce VACUUM recupère plus d'espace disque que le standard.
+      \item Ce VACUUM récupère plus d'espace disque que le standard.
       \item Il est cependant plus lent
+      \item Le VACUUM FULL posse un verrou de type \textbf{ACCESS EXCLUSIVE} sur la table en cours de traitement. Il empêche tout autre traitement d'accéder à la table.
+      \item Il est recommandé de privilégier l'utilisation du VACUUM standard
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Récupération de l'espace disque}
+
+   \begin{itemize}
+      \item Le \textbf{DELETE} ou \textbf{UPDATE} ne supprime pas immédiatement les anciennes versions d'une ligne afin que les process ayant accès à la table ait leur version courante de la ligne jusqu'à la fin de la transaction.
+      \item Lorsqu'une version devient obsolète et qu'elle n'est plus utilisée par une session, le VACUUM marque l'espace occupé par la ligne comme disponible pour les prochaines lignes.
+      \item Cela permet d'éviter l'explosion de l'espace disque occupé par une table.
+      \item L'espace disque n'est donc pas libéré: il devient disponible.
+      \item Dans le cas où l'espace disponible se trouve en fin de page et qu'il est facile d'acquérir un verrou de type exclusif, l'espace disque est rendu à l'OS
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Récupération de l'espace disque}
+
+   \begin{itemize}
+      \item A l'inverse, VACUUM FULL réécrit entièrement la table de manière compacte sans espace vide. Cela réduit la taille occupée par la table mais prend beaucoup de temps.
+      \item Durant le VACUUM FULL, l'espace disque de la table double car l'ancienne version est gardée jusqu'à la fin de l'opération
    \end{itemize}
 
 \end{frame}
