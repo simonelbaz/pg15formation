@@ -141,6 +141,110 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}{Fréquence de passage du VACUUM}
+
+   \begin{itemize}
+      \item La bonne pratique est de lancer un VACUUM standard suffisamment fréquemment pour éviter de lancer le FULL
+      \item Le démon autovacuum respecte cette philosophie et n'utilise pas le FULL
+      \item L'objectif n'est pas de garder une taille minimale pour les tables
+      \item L'objectif est de garder une taille des tables \textbf{stable}
+      \item Pour appliquer le VACUUM sur une base de données entière, il est possible d'utiliser \textsf{vacuumdb}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Cas des tables totalement supprimées}
+
+   \begin{itemize}
+      \item Lorsqu'une table est entièrement supprimée, la commande \textbf{TRUNCATE} peut être appliquée
+      \item TRUNCATE libère automatiquement l'espace disque
+      \item \textbf{Limitation:} le TRUNCATE ne respecte les principes du MVCC (vue locale des données pour chaque session)
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Cas des tables massivement mises à jour}
+
+   \begin{itemize}
+      \item Lorsqu'une table est massivement mise à jour ou supprimée, il peut être intéressant de lancer un VACUUM FULL
+      \item Une alternative au VACUUM FULL est la commande \textbf{CLUSTER}
+      \item Cette commande réécrit la table en disposant les lignes en suivant l'ordre de l'index d'une colonne
+      \item Elle est décrite plus en détail dans la partie optimisation
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{vacuumdb}
+
+   \begin{itemize}
+      \item VACUUM s'applique sur une table.
+      \item Pour l'appliquer sur une base de données, il est possible d'utiliser \textbf{vacuumdb}
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/app-vacuumdb.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Mise à jour des statistiques du planificateur de requêtes}
+
+   \begin{itemize}
+      \item Le planificateur de requêtes s'appuie sur les statistiques collectées sur les tables
+      \item La commande \textbf{ANALYZE} exécute la génération de statistiques sur une table
+      \item L'ANALYZE est également une option de la commande VACUUM. De cette manière, les 2 opérations sont lancées en parallèle sur la table.
+      \item L'ANALYZE est également une option du démon \textbf{autovacuum}
+      \item Dans le cas où l'administrateur système sait que les mises à jour de la table n'affecte pas les statistiques, il est possible de gérer l'ANALYZE manuellement.
+      \item \textbf{Les mises à jour dans les partitions de table ou les tables enfants ne provoquent d'ANALYZE automatique des tables parentes.}
+      \item Pour cela, il est nécessaire de lancer l'ANALYZE manuellement sur les tables parentes.
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/sql-vacuum.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Cas des tables fréquemment mises à jour}
+
+   \begin{itemize}
+      \item En fonction de la répartition des valeurs de données dans une colonne, il peut être intéressant ou non de lancer la commande ANALYZE
+      \item Pour des données ayant une plage de valeurs importante, l'ANALYZE est intéressant
+      \item Dans le cas inverse, il n'est pas nécessaire dans le lancer
+      \item L'ANALYZE peut être être restreint à une \textbf{colonne}. Particulièrement, celles impliquées dans les clauses WHERE avec une répartition de valeurs extrêmement irrégulière.
+      \item En pratique, il s'avère plus efficace d'appliquer l'ANALYZE à la base de données
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Qualité des statistiques}
+
+   Pour augementer l'échantillonage de l'ANALYZE, il est possible d'utiliser 2 paramètres:
+   \begin{itemize}
+      \item \textbf{default\_statistic\_target}. Par défaut, 100. La base de données sera impactée
+      \item \textbf{ALTER TABLE SET STATISTICS}. Seule la table sera impactée.
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-query.html\#GUC-DEFAULT-STATISTICS-TARGET}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Tests de vérification de la bonne santé de la base}
 
    TODO
