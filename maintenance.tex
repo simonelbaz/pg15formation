@@ -231,7 +231,7 @@
 
 \begin{frame}{Qualité des statistiques}
 
-   Pour augementer l'échantillonage de l'ANALYZE, il est possible d'utiliser 2 paramètres:
+   Pour augmenter l'échantillonage de l'ANALYZE, il est possible d'utiliser 2 paramètres:
    \begin{itemize}
       \item \textbf{default\_statistic\_target}. Par défaut, 100. La base de données sera impactée
       \item \textbf{ALTER TABLE SET STATISTICS}. Seule la table sera impactée.
@@ -240,6 +240,59 @@
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/runtime-config-query.html\#GUC-DEFAULT-STATISTICS-TARGET}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Mise à jour du tableau de visibilité}
+
+\begin{itemize}
+   \item La table de visibilité de chaque page indique si une page de données est visible à toutes ltransactions actives.
+   \item Si elle a été modifiée par une session et est en attente de flush vers le disque (dirty page), elle sera traitée par le VACUUM.
+   \item Sinon elle ne sera pas traitée par le VACUUM.
+   \item Le module \textbf{pg\_visibility} permet de visualiser les informations stockées dans la table de visibilité.
+   \item La table de visibilité est utilisée pour les index-only scans pour éviter à l'index de rafraîchir les données qu'il embarque.
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/storage-vm.html}
+\toileurl{https://www.postgresql.org/docs/15/pgvisibility.html}
+\end{toile}
+   
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Prévention des erreurs causées par la rotation des identifiants de transaction}
+
+\begin{itemize}
+   \item Chaque transaction (XID) a un identifiant stocké sur un entier de 32 bits
+   \item Cela autorise $2^{32}$ transactions
+   \item Au bout de ce nombre de transaction, le compteur XID repasse à 0
+   \item Les transactions qui étaient dans le passé se retrouvent dans le futur
+   \item Pour prévenir ce type de situation, PostgreSQL utilise un identifiant spécial \textbf{FrozenTransactionId}
+   \item Cet identifiant est antérieur à toute valeur de XID
+   \item C'est le rôle du VACUUM de positionner cet identifiant sur la ligne
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Paramétre \textbf{vacuum\_freeze\_min\_age}}
+
+\begin{itemize}
+   \item \textbf{vacuum\_freeze\_min\_age} indique le nombre de transactions au-delà duquel VACUUM envisage de traiter une table pour geler ses lignes
+   \item Une valeur trop basse de ce paramètre déclenche le gel \textsf{potentiellement inutile} d'une ligne avec le risque qu'elle soit dégelée en cas de modification
+   \item Une valeur trop haute de ce paramètre augmente le nombre de transactions nécessaires avant que cette table puisse être traitée à nouveau par le VACUUM
+\end{itemize}
+
+\begin{tiny}
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-client.html\#GUC-VACUUM-FREEZE-MIN-AGE}
+\end{toile}
+\end{tiny}
 
 \end{frame}
 
