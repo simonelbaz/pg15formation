@@ -280,7 +280,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Paramétre \textbf{vacuum\_freeze\_min\_age}}
+\begin{frame}{Paramètre \textbf{vacuum\_freeze\_min\_age}}
 
 \begin{itemize}
    \item \textbf{vacuum\_freeze\_min\_age} indique le nombre de transactions au-delà duquel VACUUM envisage de traiter une table pour geler ses lignes
@@ -293,6 +293,36 @@
 \toileurl{https://www.postgresql.org/docs/15/runtime-config-client.html\#GUC-VACUUM-FREEZE-MIN-AGE}
 \end{toile}
 \end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Paramètre \textbf{vacuum\_freeze\_table\_age}}
+
+\begin{itemize}
+   \item le VACUUM s'appuie sur la table de visibilité pour savoir s'il est nécessaire de traiter la table et supprimer les versions obsolètes des lignes
+   \item Il est cependant parfois nécessaire de geler les XID et MXID d'un certain âge
+   \item Cela s'appelle un VACUUM \textbf{agressif}
+   \item Le serveur applique un VACUUM \textbf{agressif} à la table lorsque \textbf{vacuum\_freeze\_table\_age} - \textbf{vacuum\_freeze\_min\_age} est positif
+   \item Lorsque $\textbf{vacuum\_freeze\_table\_age} = 0$, un VACUUM agressif est systématiquement appliqué
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{\textbf{autovacuum} et \textbf{vacuum\_freeze\_min\_age}}
+
+\begin{itemize}
+   \item la durée maximale qu'une table ne soit pas traitée par un VACUUM agressif est: $2^{31} - \textbf{vacuum\_freeze\_min\_age}$
+   \item La valeur de \textbf{vacuum\_freeze\_min\_age} est stockée au passage du dernier VACUUM agressif
+   \item L'\textbf{autovacuum} est déclenché lorsque $\textbf{autovacuum\_freeze\_max\_age} - \textbf{vacuum\_freeze\_min\_age}$ est positif. Ceci même si l'autovacuum n'est pas activé.
+   \item Le gel des lignes opéré par le lancement de VACUUM est influencé par \textbf{vacuum\_freeze\_table\_age}
+   \item La limite maximale posée par PostgreSQL est: $\textbf{vacuum\_freeze\_table\_age} = 0.95 * \textbf{autovacuum\_freeze\_max\_age}$
+   \item Une valeur plus élevée de \textbf{vacuum\_freeze\_table\_age} est inutile (car le VACUUM agressif sera déclenché par \textbf{autovacuum\_freeze\_max\_age})
+   \item Une valeur moins élevée de \textbf{vacuum\_freeze\_table\_age} déclenchera des VACUUM agressifs plus fréquents
+\end{itemize}
 
 \end{frame}
 
