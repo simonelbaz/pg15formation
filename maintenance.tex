@@ -288,11 +288,9 @@
    \item Une valeur trop haute de ce paramètre augmente le nombre de transactions nécessaires avant que cette table puisse être traitée à nouveau par le VACUUM
 \end{itemize}
 
-\begin{tiny}
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/runtime-config-client.html\#GUC-VACUUM-FREEZE-MIN-AGE}
 \end{toile}
-\end{tiny}
 
 \end{frame}
 
@@ -317,11 +315,40 @@
 \begin{itemize}
    \item la durée maximale qu'une table ne soit pas traitée par un VACUUM agressif est: $2^{31} - \textbf{vacuum\_freeze\_min\_age}$
    \item La valeur de \textbf{vacuum\_freeze\_min\_age} est stockée au passage du dernier VACUUM agressif
-   \item L'\textbf{autovacuum} est déclenché lorsque $\textbf{autovacuum\_freeze\_max\_age} - \textbf{vacuum\_freeze\_min\_age}$ est positif. Ceci même si l'autovacuum n'est pas activé.
+   \item L'\textbf{autovacuum} est déclenché lorsque $\textbf{autovacuum\_freeze\_max\_age} - \textbf{vacuum\_freeze\_min\_age}$ est positif.
+   \item Pour empêcher la perte de données, il est déclenché même si \textbf{autovacuum\_freeze\_max\_age} n'est pas positionné
    \item Le gel des lignes opéré par le lancement de VACUUM est influencé par \textbf{vacuum\_freeze\_table\_age}
    \item La limite maximale posée par PostgreSQL est: $\textbf{vacuum\_freeze\_table\_age} = 0.95 * \textbf{autovacuum\_freeze\_max\_age}$
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{\textbf{autovacuum} et \textbf{vacuum\_freeze\_min\_age}}
+
+\begin{itemize}
    \item Une valeur plus élevée de \textbf{vacuum\_freeze\_table\_age} est inutile (car le VACUUM agressif sera déclenché par \textbf{autovacuum\_freeze\_max\_age})
    \item Une valeur moins élevée de \textbf{vacuum\_freeze\_table\_age} déclenchera des VACUUM agressifs plus fréquents
+   \item Le seul inconvénient d'augmenter \textbf{autovacuum\_freeze\_max\_age} entraîne un espace disque plus important occupé par les répertoires: 
+      \begin{itemize}
+         \item \textbf{pg\_xact}
+         \item \textbf{pg\_commit\_ts}
+      \end{itemize}
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-autovacuum.html\#GUC-AUTOVACUUM-FREEZE-MAX-AGE}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Les répertoires \textbf{pg\_xact} et \textbf{pg\_commit\_ts}}
+
+\begin{itemize}
+   \item WIP
 \end{itemize}
 
 \end{frame}
