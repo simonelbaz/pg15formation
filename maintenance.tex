@@ -273,7 +273,23 @@
    \item Les transactions qui étaient dans le passé se retrouvent dans le futur
    \item Pour prévenir ce type de situation, PostgreSQL utilise un identifiant spécial \textbf{FrozenTransactionId}
    \item Cet identifiant est antérieur à toute valeur de XID
-   \item C'est le rôle du VACUUM de positionner cet identifiant sur la ligne
+   \item C'est le rôle du VACUUM de positionner cet identifiant de transaction sur la ligne
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Rayon de $2^{31}$ pour chaque XID}
+
+\begin{itemize}
+   \item D'après ce qui a été dit précédemment chaque XID voit:
+   \begin{itemize}
+      \item Les $2^{31}$ transactions plus anciennes que lui
+      \item et $2^{31}$ transactions futures
+   \end{itemize}
+   \item Une ligne ne sera jamais plus \textit{âgée} que $2^{31} = 2$ millions transactions
+   \item A partir d'un certain âge paramétrable, son XID est gelé en FrozenTransactionId
 \end{itemize}
 
 \end{frame}
@@ -285,19 +301,19 @@
 \begin{itemize}
    \item le VACUUM s'appuie sur la table de visibilité pour savoir s'il est nécessaire de traiter la table et supprimer les versions obsolètes des lignes
    \item Il est cependant parfois nécessaire de geler les XID et MXID d'un certain âge
-   \item Cela s'appelle un VACUUM \textbf{agressif}
+   \item Cette opération s'appelle le VACUUM \textbf{agressif}
 \end{itemize}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Paramètre \textbf{vacuum\_freeze\_min\_age}}
+\begin{frame}{Age d'une ligne - \textbf{vacuum\_freeze\_min\_age}}
 
 \begin{itemize}
-   \item \textbf{vacuum\_freeze\_min\_age} indique le nombre de transactions au-delà duquel VACUUM envisage de traiter une table pour geler ses lignes
+   \item \textbf{vacuum\_freeze\_min\_age} indique le nombre de transactions au-delà duquel VACUUM envisage de traiter une \textbf{ligne} de table pour geler son XID
    \item Une valeur trop basse de ce paramètre déclenche le gel \textsf{potentiellement inutile} d'une ligne avec le risque qu'elle soit dégelée en cas de modification
-   \item Une valeur trop haute de ce paramètre augmente le nombre de transactions nécessaires avant que cette table puisse être traitée à nouveau par le VACUUM
+   \item Une valeur trop haute de ce paramètre augmente le nombre de transactions nécessaires avant que cette \textbf{ligne} de table puisse être traitée à nouveau par le VACUUM
    \item Valeur comprise entre 0 et $10^{9}$. Par défaut, $50*10^{6}$ transactions.
    \item Valeur automatiquement cappée à $\textbf{autovacuum\_freeze\_max\_age}/2$
 \end{itemize}
@@ -310,7 +326,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Paramètre \textbf{vacuum\_freeze\_table\_age}}
+\begin{frame}{Age d'une table - \textbf{vacuum\_freeze\_table\_age}}
 
 \begin{itemize}
    \item Le serveur applique un VACUUM \textbf{agressif} à la table lorsque \textbf{vacuum\_freeze\_table\_age} - \textbf{vacuum\_freeze\_min\_age} est positif
@@ -357,6 +373,18 @@
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/runtime-config-autovacuum.html\#GUC-AUTOVACUUM-FREEZE-MAX-AGE}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Schéma récapitulatif}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=\textwidth]{images/xid_freeze.eps}
+\end{center}
+\end{figure}
 
 \end{frame}
 
