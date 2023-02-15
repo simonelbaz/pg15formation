@@ -280,12 +280,26 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}{VACUUM \textbf{agressif}}
+
+\begin{itemize}
+   \item le VACUUM s'appuie sur la table de visibilité pour savoir s'il est nécessaire de traiter la table et supprimer les versions obsolètes des lignes
+   \item Il est cependant parfois nécessaire de geler les XID et MXID d'un certain âge
+   \item Cela s'appelle un VACUUM \textbf{agressif}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}{Paramètre \textbf{vacuum\_freeze\_min\_age}}
 
 \begin{itemize}
    \item \textbf{vacuum\_freeze\_min\_age} indique le nombre de transactions au-delà duquel VACUUM envisage de traiter une table pour geler ses lignes
    \item Une valeur trop basse de ce paramètre déclenche le gel \textsf{potentiellement inutile} d'une ligne avec le risque qu'elle soit dégelée en cas de modification
    \item Une valeur trop haute de ce paramètre augmente le nombre de transactions nécessaires avant que cette table puisse être traitée à nouveau par le VACUUM
+   \item Valeur comprise entre 0 et $10^{9}$. Par défaut, $50*10^{6}$ transactions.
+   \item Valeur automatiquement cappée à $\textbf{autovacuum\_freeze\_max\_age}/2$
 \end{itemize}
 
 \begin{toile}
@@ -299,12 +313,14 @@
 \begin{frame}{Paramètre \textbf{vacuum\_freeze\_table\_age}}
 
 \begin{itemize}
-   \item le VACUUM s'appuie sur la table de visibilité pour savoir s'il est nécessaire de traiter la table et supprimer les versions obsolètes des lignes
-   \item Il est cependant parfois nécessaire de geler les XID et MXID d'un certain âge
-   \item Cela s'appelle un VACUUM \textbf{agressif}
    \item Le serveur applique un VACUUM \textbf{agressif} à la table lorsque \textbf{vacuum\_freeze\_table\_age} - \textbf{vacuum\_freeze\_min\_age} est positif
    \item Lorsque $\textbf{vacuum\_freeze\_table\_age} = 0$, un VACUUM agressif est systématiquement appliqué
+   \item \textbf{pg\_class.relfrozenxid} est le niveau du XID en dessous duquel tous les XID de la table ont été gelés
 \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/catalog-pg-class.html}
+\end{toile}
 
 \end{frame}
 
@@ -325,7 +341,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{\textbf{autovacuum} et \textbf{vacuum\_freeze\_min\_age}}
+\begin{frame}{Paramètre \textbf{autovacuum\_freeze\_max\_age}}
 
 \begin{itemize}
    \item Une valeur plus élevée de \textbf{vacuum\_freeze\_table\_age} est inutile (car le VACUUM agressif sera déclenché par \textbf{autovacuum\_freeze\_max\_age})
@@ -335,6 +351,7 @@
          \item \textbf{pg\_xact}
          \item \textbf{pg\_commit\_ts}
       \end{itemize}
+   \item Valeur par défaut: $200*10^{6}$ 
 \end{itemize}
 
 \begin{toile}
