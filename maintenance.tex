@@ -285,11 +285,9 @@
 \begin{itemize}
    \item D'après ce qui a été dit précédemment chaque XID voit:
    \begin{itemize}
-      \item Les $2^{31}$ transactions plus anciennes que lui
-      \item et $2^{31}$ transactions futures
+      \item au maximum $2^{31}$ transactions plus anciennes que lui
+      \item et au maximum $2^{31}$ transactions plus récente que lui
    \end{itemize}
-   \item Une ligne ne sera jamais plus \textit{âgée} que $2^{31} = 2$ millions transactions
-   \item A partir d'un certain âge paramétrable, son XID est gelé en FrozenTransactionId
 \end{itemize}
 
 \end{frame}
@@ -308,10 +306,27 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Age d'une ligne - \textbf{vacuum\_freeze\_min\_age}}
+\begin{frame}{Age d'une ligne}
 
 \begin{itemize}
-   \item \textbf{vacuum\_freeze\_min\_age} indique le nombre de transactions au-delà duquel VACUUM envisage de traiter une \textbf{ligne} de table pour geler son XID
+   \item Ma compréhension de la documentation m'incite à dire que l'âge d'une ligne a pour formule:
+      \begin{itemize}
+      \item si $XID courant > XID ligne, age = XID courant - XID ligne$
+      \item sinon, $age = XID courant - XID ligne + 2^{31}$
+      \end{itemize}
+   \item Une ligne ne sera jamais plus \textit{âgée} que $2^{31} = 2$ millions transactions
+   \item A partir d'un certain âge paramétrable, son XID est gelé en FrozenTransactionId
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{\textbf{vacuum\_freeze\_min\_age}}
+
+\begin{itemize}
+   \item \textbf{vacuum\_freeze\_min\_age} indique le nombre de transactions \textbf{"vues par le XID de la ligne"} au-delà duquel VACUUM envisage de traiter une \textbf{ligne} de table pour geler son XID
+   \item Il correspond à l'âge minimum d'une ligne pour être éligible au VACUUM agressif
    \item Une valeur trop basse de ce paramètre déclenche le gel \textsf{potentiellement inutile} d'une ligne avec le risque qu'elle soit dégelée en cas de modification
    \item Une valeur trop haute de ce paramètre augmente le nombre de transactions nécessaires avant que cette \textbf{ligne} de table puisse être traitée à nouveau par le VACUUM
    \item Valeur comprise entre 0 et $10^{9}$. Par défaut, $50*10^{6}$ transactions.
@@ -329,9 +344,11 @@
 \begin{frame}{Age d'une table - \textbf{vacuum\_freeze\_table\_age}}
 
 \begin{itemize}
-   \item Le serveur applique un VACUUM \textbf{agressif} à la table lorsque \textbf{vacuum\_freeze\_table\_age} - \textbf{vacuum\_freeze\_min\_age} est positif
+   \item Le serveur applique un VACUUM \textbf{agressif} à la table lorsque \textbf{vacuum\_freeze\_table\_age} - \textbf{pg\_class.relfrozenxid} est positif
    \item Lorsque $\textbf{vacuum\_freeze\_table\_age} = 0$, un VACUUM agressif est systématiquement appliqué
    \item \textbf{pg\_class.relfrozenxid} est le niveau du XID en dessous duquel tous les XID de la table ont été gelés
+   \item En résumé, il correspond au XID le plus vieux de la table et indique en somme "l'âge" de la table
+   \item Valeur par défaut: $150 * 10^6$ transactions
 \end{itemize}
 
 \begin{toile}
@@ -347,9 +364,8 @@
 \begin{itemize}
    \item la durée maximale qu'une table ne soit pas traitée par un VACUUM agressif est: $2^{31} - \textbf{vacuum\_freeze\_min\_age}$
    \item La valeur de \textbf{vacuum\_freeze\_min\_age} est stockée au passage du dernier VACUUM agressif
-   \item L'\textbf{autovacuum} est déclenché lorsque $\textbf{autovacuum\_freeze\_max\_age} - \textbf{vacuum\_freeze\_min\_age}$ est positif.
+   \item La fréquence du passage de l'\textbf{autovacuum} est environ toutes les $\textbf{autovacuum\_freeze\_max\_age} - \textbf{vacuum\_freeze\_min\_age}$ transactions.
    \item Pour empêcher la perte de données, il est déclenché même si \textbf{autovacuum\_freeze\_max\_age} n'est pas positionné
-   \item Le gel des lignes opéré par le lancement de VACUUM est influencé par \textbf{vacuum\_freeze\_table\_age}
    \item La limite maximale posée par PostgreSQL est: $\textbf{vacuum\_freeze\_table\_age} = 0.95 * \textbf{autovacuum\_freeze\_max\_age}$
 \end{itemize}
 
@@ -364,8 +380,8 @@
    \item Une valeur moins élevée de \textbf{vacuum\_freeze\_table\_age} déclenchera des VACUUM agressifs plus fréquents
    \item Le seul inconvénient d'augmenter \textbf{autovacuum\_freeze\_max\_age} entraîne un espace disque plus important occupé par les répertoires: 
       \begin{itemize}
-         \item \textbf{pg\_xact}
-         \item \textbf{pg\_commit\_ts}
+         \item \textbf{pg\_xact}: Statut des commits
+         \item \textbf{pg\_commit\_ts}: Timestamp des commits si cette fonctionnalité est activé
       \end{itemize}
    \item Valeur par défaut: $200*10^{6}$ 
 \end{itemize}
