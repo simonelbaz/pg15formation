@@ -381,7 +381,7 @@
    \item Le seul inconvénient d'augmenter \textbf{autovacuum\_freeze\_max\_age} entraîne un espace disque plus important occupé par les répertoires: 
       \begin{itemize}
          \item \textbf{pg\_xact}: Statut des commits
-         \item \textbf{pg\_commit\_ts}: Timestamp des commits si cette fonctionnalité est activé
+         \item \textbf{pg\_commit\_ts}: Timestamp des commits si cette fonctionnalité est activée
       \end{itemize}
    \item Valeur par défaut: $200*10^{6}$ 
 \end{itemize}
@@ -406,11 +406,58 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Les répertoires \textbf{pg\_xact} et \textbf{pg\_commit\_ts}}
+\begin{frame}{Tables de suivi des XID}
 
 \begin{itemize}
-   \item WIP
+   \item Les données sur les XIDs sont stockées dans les table pg\_class et pg\_database
+   \item La colonne pg\_class.relfrozenxid indique le plus ancien XID non gelé de la table
+   \item Cette colonne est mise à jour par la dernière opération de VACUUM agressif réussie
+   \item Au niveau base de données, la colonne pg\_database.datfrozenxid indique le min de tous les pg\_class.relfrozenxid
 \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Requêtes SQL pour le suivi des XID}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+SELECT c.oid::regclass as table_name,
+       greatest(age(c.relfrozenxid),age(t.relfrozenxid)) as age
+FROM pg_class c
+LEFT JOIN pg_class t ON c.reltoastrelid = t.oid
+WHERE c.relkind IN ('r', 'm');
+
+SELECT datname, age(datfrozenxid) FROM pg_database;
+\end{Verbatim}
+\end{tiny}
+
+\begin{itemize}
+   \item La colonne age indique le nombre de transactions entre le XID courant et celui du cutoff du VACUUM agressif
+   \item relkind = 'r': table ordinaire
+   \item relkind = 'm': vue matérialisée
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/catalog-pg-class.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Logs de suivi des VACUUM}
+
+\begin{itemize}
+   \item La colonne age indique le nombre de transactions entre le XID courant et celui du cutoff du VACUUM agressif
+   \item relkind = 'r': table ordinaire
+   \item relkind = 'm': vue matérialisée
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/catalog-pg-class.html}
+\end{toile}
 
 \end{frame}
 
