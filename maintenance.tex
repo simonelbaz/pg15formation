@@ -505,8 +505,18 @@ HINT:  Stop the postmaster and vacuum that database in single-user mode.
 \begin{frame}[fragile]{Démarrage du serveur PostgreSQL en mode single-user}
 
 \begin{itemize}
-   \item En cas d'échec de l'autovacuum, le serveur émet le warning suivant avant la limite $2^{32} - 40$ millions de transactions:
+   \item Pour démarrer le serveur en mode single-user, lancer la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+   postgres --single -D /usr/local/pgsql/data other-options my_database
+\end{Verbatim}
+\end{tiny}
+   \item Dans ce mode, le serveur n'applique pas les mesures de sécurité pour éteindre le process en cas de "danger"
 \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/app-postgres.html}
+\end{toile}
 
 \end{frame}
 
