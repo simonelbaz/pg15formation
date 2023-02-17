@@ -724,6 +724,66 @@ Enter same passphrase again:
    \item Le modèle template0 est identique au modèle template1
    \item A la différence de template1, il ne doit jamais être modifié car il représente la base de données à l'état initial
    \item Ce modèle sert de base pour la création de base de données à partir d'un dump généré par \textbf{pg\_dump}
+   \item Une autre raison de partir du modèle template0 pour créer une nouvelle base de données, est le changement de jeu de caractères
+   \item template0 ne contient pas de choix de jeu de caractères par défaut. Ce qui n'est pas le cas de template1.
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'une base de données à partir d'un modèle}
+
+   Pour créer une base de données à partir du modèle template0, les 2 commandes suivantes sont utilisables au choix:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+CREATE DATABASE dbname TEMPLATE template0;
+\end{Verbatim}
+\end{tiny}
+ou depuis le shell:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+createdb -T template0 dbname
+\end{Verbatim}
+\end{tiny}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Généralisation des modèles}
+
+\begin{itemize}
+   \item La commande \textbf{CREATE DATABASE} permet de crér une nouvelle base de données en utilisant une autre comme un modèle
+   \item Cependant, cet usage est fortement déconseillé
+   \item En effet, pendant la copie de la base source, aucune session ne peut se connecter sur la base source
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{La table \textbf{pg\_database}}
+
+\begin{itemize}
+   \item La table pg\_database inclut 2 colonnes intéressantes:
+   \begin{itemize}
+      \item \textbf{datistemplate}: la base peut servir de modèle. Sinon seuls les super-utilisateurs et le propriétaire de la base peuvent s'en servir comme modèle
+      \item \textbf{datallowconn}: aucune nouvelle session ne peut être créée.
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{La base de données \textbf{postgres}}
+
+\begin{itemize}
+   \item Cette base est une simple copie de template1
+   \item Elle sert de base de connexion par défaut pour les utilisateurs et les applications
+   \item Elle peut être détruite et recopiée depuis template1
 \end{itemize}
 
 \end{frame}

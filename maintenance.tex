@@ -447,17 +447,11 @@ SELECT datname, age(datfrozenxid) FROM pg_database;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Logs de suivi des VACUUM}
+\begin{frame}{Logs de suivi des VACUUM}
 
 \begin{itemize}
-   \item La colonne age indique le nombre de transactions entre le XID courant et celui du cutoff du VACUUM agressif
-   \item relkind = 'r': table ordinaire
-   \item relkind = 'm': vue matérialisée
+   \item Lorsque l'option \textbf{VERBOSE} de VACUUM est activée, certaines statistiques de la table sont affichées.
 \end{itemize}
-
-\begin{toile}
-\toileurl{https://www.postgresql.org/docs/15/catalog-pg-class.html}
-\end{toile}
 
 \end{frame}
 
