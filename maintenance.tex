@@ -451,6 +451,61 @@ SELECT datname, age(datfrozenxid) FROM pg_database;
 
 \begin{itemize}
    \item Lorsque l'option \textbf{VERBOSE} de VACUUM est activée, certaines statistiques de la table sont affichées.
+   \item L'évolution des champs \textbf{relfrozenxid} et \textbf{relminmxid} est mentionné
+   \item Le même niveau de détails de log est activé lorsque l'option \textbf{log\_autovacuum\_min\_duration} a une valeur différente de -1
+   \item Valeur par défaut de l'option $\textbf{log\_autovacuum\_min\_duration} = 10$ minutes
+   \item Cette option est pratique car elle permet de surveiller l'activité de l'autovacuum
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le champ relminmxid}
+
+\begin{itemize}
+   \item To translate
+   \item All multixact IDs before this one have been replaced by a transaction ID in this table. This is used to track whether the table needs to be vacuumed in order to prevent multixact ID wraparound or to allow pg\_multixact to be shrunk. Zero (InvalidMultiXactId) if the relation is not a table.
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/catalog-pg-class.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{En cas d'échec de l'autovacuum}
+
+\begin{itemize}
+   \item En cas d'échec de l'autovacuum, le serveur émet le warning suivant avant la limite $2^{32} - 40$ millions de transactions:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+WARNING:  database "mydb" must be vacuumed within 39985967 transactions
+HINT:  To avoid a database shutdown, execute a database-wide VACUUM in that database.
+\end{Verbatim}
+\end{tiny}
+   \item Un VACUUM lancé par un \textbf{super utilisateur} devrait résoudre le problème
+   \item Les droits \textbf{super utilisateur} sont nécessaires pour modifier le champ \textbf{datfrozenxid}
+   \item Si le DBA ignore les avertissements, le serveur s'arrête et refuse toute nouvelle transaction avant la limite $2^{32} - 3$ millions de transactions:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+ERROR:  database is not accepting commands to avoid wraparound data loss in database "mydb"
+HINT:  Stop the postmaster and vacuum that database in single-user mode.
+\end{Verbatim}
+\end{tiny}
+   \item Dans ce cas, il devient nécessaire de lancer le serveur en mode single-user
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Démarrage du serveur PostgreSQL en mode single-user}
+
+\begin{itemize}
+   \item En cas d'échec de l'autovacuum, le serveur émet le warning suivant avant la limite $2^{32} - 40$ millions de transactions:
 \end{itemize}
 
 \end{frame}
