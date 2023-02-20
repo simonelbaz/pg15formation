@@ -711,13 +711,53 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
 \begin{frame}{La réindexation}
 
 \begin{itemize}
-   \item TODO
+   \item Lorsque des clés de l'index sont regulièrement supprimées, il est intéressant de lancer la commande \textbf{REINDEX}
+   \item Elle permet de récupérer l'espace non utilisé et améliore légèrement l'accès aux index
+   \item REINDEX réorganise les clés de l'index de manière adjacente pour permettre un accès optimal
+   \item L'occupation de l'espace disque par les indexes non B-tree n'est pas très bien maîtrisée.
+   \item Il est important de surveiller l'espace disque occupé par les index
+   \item REINDEX pose par défaut un verrou de type \textbf{ACCESS EXCLUSIVE} sur la table en cours d'indexation.
+   \item Il est impossible de modifier la table pendant ce type de réindexation
 
 \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/routine-reindex.html}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{La réindexation concurrente}
+
+\begin{itemize}
+   \item La réindexation concurrente est activée avec l'option \textbf{CONCURRENTLY}
+   \item Elle permet la modification de la table en cours de réindexation
+   \item Elle est plus gourmande en CPU et I/O car l'index est généré en 2 passes:  
+   \begin{itemize}
+      \item Une première passe pour scanner la table et regénérer un index temporaire
+      \item Cet index devient disponible pour l'ajout de clés
+      \item Une deuxième passe pour récupérer les clés générées pendant la première phase
+   \end{itemize}
+
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/sql-reindex.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Troubleshooting de la réindexation concurrente}
+
+\begin{itemize}
+   \item WIP
+
+\end{itemize}
 
 \end{frame}
 
