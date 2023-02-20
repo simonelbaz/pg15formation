@@ -512,10 +512,140 @@ HINT:  Stop the postmaster and vacuum that database in single-user mode.
 \end{Verbatim}
 \end{tiny}
    \item Dans ce mode, le serveur n'applique pas les mesures de sécurité pour éteindre le process en cas de "danger"
+   \item A ce moment, il devient possible de lancer le VACUUM FREEZE
 \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/app-postgres.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Multi-transactions et repli des identifiants de transactions}
+
+\begin{itemize}
+   \item Il est possible qu'une ligne de table soit verrouillé par plusieurs transactions
+   \item Les identifiants de transactions multiples sont stockés dans le répertoire \textbf{pg\_multixact}
+   \item Comme pour les transactions classiques, ils sont stockées sur 32 bits et varient entre 0 et $2^{32}$
+   \item Les seuils de traitement d'une ligne et d'une table sont respectivement \textbf{vacuum\_multixact\_freeze\_min\_age} et \textbf{vacuum\_multixact\_freeze\_table\_age}
+   \item L'indicateur d'âge d'une table pour les multi-transactions est: \textbf{pg\_class.relminmxid}
+   \item De manière similaire,  toute table ayant l'âge \textbf{autovacuum\_multixact\_freeze\_max\_age} pour ses multitransactions, sera traitée par un VACUUM agressif
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le démon \textbf{autovacuum}}
+
+\begin{itemize}
+   \item L'autovacuum lance automatiquement le VACUUM et l'NALAYZE (collecte de statistiques) sur chaque table
+   \item Par défaut, le paramètre \textbf{track\_counts} = on. Il est utilisé par l'autovacuum pour suivre l'activité de la base de données et se déclencher au moment opportun
+   \item Le démon autovacuum se décline en plusieurs process:
+   \begin{itemize}
+      \item l'\textbf{autovacuum launcher} en charge de démarrer l'\textbf{autovacuum worker} pour chaque base de données
+      \item le launcher démarre un work tous les \textbf{autovacuum\_naptime} secondes pour chaque base de données
+   \end{itemize}
+   \item un work sera donc lancé tous les \text{autovacuum\_naptime}/N secondes s'il y a N bases de données
+   \item La limite est de \textbf{autovacuum\_max\_workers} worker par base de données
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Le paramètre \textbf{autovacuum\_max\_workers}}
+
+\begin{itemize}
+   \item Si le nombre de bases de données est supérieur à autovacuum\_max\_workers, la prochaine base de données sera traité sitôt que le worker aura fini.
+   \item Les worker ne sont pas inclus dans les limites \textbf{max\_connections} or \textbf{superuser\_reserved\_connections}.
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{A quel moment autovacuum se déclenche - modifications/suppressions}
+
+\begin{itemize}
+   \item Lorsqu'une table a une valeur \textbf{relfrozenxid} plus âgée que \textbf{autovacuum\_freeze\_max\_age}
+   \item Lorsque le nombre de relations de la table (modifiées ou supprimées depuis le dernier VACUUM) atteint le seuil suivant:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+vacuum threshold = vacuum base threshold + vacuum scale factor * number of tuples
+\end{Verbatim}
+\end{tiny}
+   \item avec vacuum base threshold = autovacuum\_vacuum\_threshold et vacuum scale factor = autovacuum\_vacuum\_scale\_factor
+   \item le nombre de tuples est fourni par pg\_class.reltuples
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{A quel moment autovacuum se déclenche - insertions}
+
+\begin{itemize}
+   \item Lorsque le nombre de relations de la table (inserées depuis le dernier VACUUM) atteint le seuil suivant:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+vacuum insert threshold = vacuum base insert threshold + vacuum insert scale factor * number of tuples
+\end{Verbatim}
+\end{tiny}
+   \item avec vacuum base insert threshold = autovacuum\_vacuum\_insert\_threshold et vacuum scale factor = autovacuum\_vacuum\_insert\_scale\_factor
+   \item le nombre de tuples est fourni par pg\_class.reltuples
+   \item Pour une table modifiée principalement par \textbf{INSERT} et peu par \textbf{UPDATE} ou \textbf{DELETE}, il est intéressant de baisser le seuil \textbf{autovacuum\_freeze\_min\_age} pour alléger la charge des prochains VACCUM (\textit{avec un risque de dégel peu élevé})
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{A quel moment autovacuum réalise un ANALYZE}
+
+\begin{itemize}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+analyze threshold = analyze base threshold + analyze scale factor * number of tuples
+\end{Verbatim}
+\end{tiny}
+   \item Le seuil d'ANALYZE est comparé avec le nombre de lignes en INSERT, DELETE ou UPDATE depuis le dernier ANALYZE
+   \item avec analyze base threshold = \textbf{autovacuum\_analyze\_threshold} et analyze scale factor = \textbf{autovacuum\_analyze\_scale\_factor}
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Limites de l'autovacuum}
+
+\begin{itemize}
+   \item WIP
+
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{La réindexation}
+
+\begin{itemize}
+   \item TODO
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/routine-reindex.html}
 \end{toile}
 
 \end{frame}
