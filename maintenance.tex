@@ -75,30 +75,9 @@
       \item Le VACUUM standard peut être lancé en parallèle des commandes SQL (\textbf{SELECT}, \textbf{UPDATE}, \textbf{INSERT} et \textbf{DELETE})
       \item la commande \textbf{ALTER TABLE} ne peut être exécutée sur une table en cours de traitement par le process
       \item le VACUUM génère des I/O très importantes qui diminuent les performances des autres sessions actives
-      \item Il est possible de tempérer la charge I/O causée par le VACUUM par l'intermédiaire des paramètres: \textbf{vacuum\_cost\_*},
+      \item Il est possible de tempérer la charge I/O causée par le VACUUM par l'intermédiaire des paramètres: \textbf{vacuum\_cost\_*} (cf. ~\ref{vacuum-cost})
    \end{itemize}
 
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Les paramètres \textbf{vacuum\_cost\_*}}
-
-   Lors de l'exécution des commandes VACUUM et ANALYZE, le serveur garde une trace des coûts I/O engendrés par ces opérations. Lorsque l'accumulation de ces coûts atteint un seuil paramétrable, le process en cours de VACUUM est mis en sommeil pour une durée paramétrable et les coûts sont remis à 0.
-   \begin{itemize}
-      \item \textbf{vacuum\_cost\_delay}: durée de temps en millisecond pendant laquelle le process VACUUM sommeille
-      \item \textbf{vacuum\_cost\_page\_hit}: coût associé au traitement d'une page dans les shared\_buffers (1)
-      \item \textbf{vacuum\_cost\_page\_miss}: coût associé à une page en disque (2)
-      \item \textbf{vacuum\_cost\_page\_dirty}: coût associé à une page modifiée (dirty page). Elle va nécessiter un flush vers le disque et de l'I/O (20)
-      \item \textbf{vacuum\_cost\_limit}: seuil à partir duquel le process est mis en sommeil (200 par défaut)
-   \end{itemize}
-
-   Les valeurs par défaut sont adaptées.
-
-\begin{toile}
-\toileurl{https://www.postgresql.org/docs/15/runtime-config-resource.html\#RUNTIME-CONFIG-RESOURCE-VACUUM-COST}
-\end{toile}
-   
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -654,7 +633,8 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
 
 \begin{itemize}
    \item Durant les opérations de VACUUM ou d'ANALYZE, les opérations I/O peuvent être pénalisantes pour les autres opérations du serveur
-   \item Pour cela, il est possible pour l'administrateur de définir un seuil d'I/O à partir duquel le VACUUM rentre en sommeil.
+   \item Lors de l'exécution des commandes VACUUM et ANALYZE, le serveur garde une trace des coûts I/O engendrés par ces opérations et réalise une accumulation de ces coûts.
+   \item Il est possible pour l'administrateur de définir un seuil d'accumulation d'I/O à partir duquel le VACUUM rentre en sommeil et les coûts sont remis à 0.
    \item Par défaut, cette fonctionnalité est \textbf{désactivée} pour les opérations manuelles. Pour l'activer, il est nécessaire de positionner le paramètre \textbf{vacuum\_cost\_delay} à une valeur différente de zéro.
    \item Le seuil est défini par le paramètre \textbf{vacuum\_cost\_limit}. Valeur par défaut 200.
    \item La durée de sommeil du process VACUUM en millisecondes est: \textbf{vacuum\_cost\_delay}. Valeur par défaut 0.
@@ -672,6 +652,7 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[fragile]{Comment est calculé le coût du VACUUM}
+\label{vacuum-cost}
 
 \begin{itemize}
    \item Les différents critères utilisés pour calculer le coût d'un VACUUM sont:
@@ -718,6 +699,7 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
    \item Il est important de surveiller l'espace disque occupé par les index
    \item REINDEX pose par défaut un verrou de type \textbf{ACCESS EXCLUSIVE} sur la table en cours d'indexation.
    \item Il est impossible de modifier la table pendant ce type de réindexation
+   \item Le process de réindexation renseigne la table \textbf{pg\_stat\_progress\_create\_index} pendant son exécution
 
 \end{itemize}
 
@@ -752,12 +734,66 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Troubleshooting de la réindexation concurrente}
+\begin{frame}[fragile]{Troubleshooting de la réindexation concurrente}
 
 \begin{itemize}
-   \item WIP
+   \item En cas d'erreur de rebuild de l'index, la commande \commande{\d} appliquée à la table permet de vérifier l'état des index de la table:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+   postgres=# \d tab
+       Table "public.tab"
+ Column |  Type   | Modifiers
+--------+---------+-----------
+ col    | integer |
+Indexes:
+    "idx" btree (col)
+    "idx_ccnew" btree (col) INVALID
+\end{Verbatim}
+\end{tiny}
+   \item Dans le cas présent, l'index est à l'état invalide
+   \item Il est suffixé par \textbf{ccnew}, il correspond à l'index temporaire créé à la première passe
+   \item Il suffit de le supprimer avec la commande \commande{DROP INDEX} et de le recréer avec \commande{REINDEX CONCURRENTLY}
+   \item S'il est suffixé par \textbf{ccold}, il correspond à l'index original qui est maintenant obsolète
+   \item Il suffit de le supprimer avec la commande \commande{DROP INDEX}
 
 \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Limites de la réindexation concurrente}
+
+\begin{itemize}
+   \item Il est possible d'appliquer plusieurs \textbf{REINDEX} sur d'autres index de la table en parallèle
+   \item Ce n'est pas possible avec \textbf{REINDEX CONCURRENTLY}
+   \item \textbf{REINDEX CONCURRENTLY} n'est pas utilisable dans une transaction alors que \textbf{REINDEX} est utilisable dans une transaction
+   \item \textbf{REINDEX SYSTEM} n'est pas utilisable avec l'option \textbf{CONCURRENTLY}
+   \item L'option \textbf{CONCURRENTLY} ne peut pas être utilisable sur un index de type contrainte d'exclusion. Ce type d'index peut être réindexé sans l'option \textbf{CONCURRENTLY}
+
+\end{itemize}
+
+
+\begin{tiny}
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/ddl-partitioning.html\#DDL-PARTITIONING-CONSTRAINT-EXCLUSION}
+\end{toile}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercices}
+
+   \begin{itemize}
+\item VACUUM
+\item VACUUM FULL après DELETE pour vérifier récuperation espace disque
+\item Modifier freeze\_min\_age et freeze\_table\_age
+\item VACUUM FREEZE
+\item relfrozenxid
+\item reindexation
+   \end{itemize}
 
 \end{frame}
 
