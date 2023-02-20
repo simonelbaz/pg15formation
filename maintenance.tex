@@ -566,6 +566,10 @@ HINT:  Stop the postmaster and vacuum that database in single-user mode.
 
 \end{itemize}
 
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-autovacuum.html}
+\end{toile}
+
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -600,7 +604,7 @@ vacuum insert threshold = vacuum base insert threshold + vacuum insert scale fac
 \end{tiny}
    \item avec vacuum base insert threshold = autovacuum\_vacuum\_insert\_threshold et vacuum scale factor = autovacuum\_vacuum\_insert\_scale\_factor
    \item le nombre de tuples est fourni par pg\_class.reltuples
-   \item Pour une table modifiée principalement par \textbf{INSERT} et peu par \textbf{UPDATE} ou \textbf{DELETE}, il est intéressant de baisser le seuil \textbf{autovacuum\_freeze\_min\_age} pour alléger la charge des prochains VACCUM (\textit{avec un risque de dégel peu élevé})
+   \item Pour une table modifiée principalement par \textbf{INSERT} et peu par \textbf{UPDATE} ou \textbf{DELETE}, il est intéressant de baisser le seuil \textbf{autovacuum\_freeze\_min\_age} pour alléger la charge des prochains VACUUM (\textit{avec un risque de dégel peu élevé})
 
 \end{itemize}
 
@@ -628,9 +632,76 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
 \begin{frame}[fragile]{Limites de l'autovacuum}
 
 \begin{itemize}
-   \item WIP
+   \item Les tables partitionnées ne sont pas traitées par l'autovacuum
+   \item Les statistiques sont collectés manuellement en lançant un ANALYZE manuel à l'initialisation de la table et après chaque changement significatif
+   \item Les tables temporaires ne sont pas accessibles par l'autovacuum
+   \item Elles nécessitent un traitement manuel de l'ANALYZE et VACUUM en passant par des commandes SQL
+   \item Les paramètres de l'autovacuum sont définis dans \textbf{postgresql.conf}. Cependant, il est possible de les surcharger directement à la définition de la table
 
+\end{itemize}
 
+\begin{tiny}
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/sql-createtable.html\#SQL-CREATETABLE-STORAGE-PARAMETERS}
+\end{toile}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Répartition de la charge du VACUUM par les facteurs de coûts}
+
+\begin{itemize}
+   \item Durant les opérations de VACUUM ou d'ANALYZE, les opérations I/O peuvent être pénalisantes pour les autres opérations du serveur
+   \item Pour cela, il est possible pour l'administrateur de définir un seuil d'I/O à partir duquel le VACUUM rentre en sommeil.
+   \item Par défaut, cette fonctionnalité est \textbf{désactivée} pour les opérations manuelles. Pour l'activer, il est nécessaire de positionner le paramètre \textbf{vacuum\_cost\_delay} à une valeur différente de zéro.
+   \item Le seuil est défini par le paramètre \textbf{vacuum\_cost\_limit}. Valeur par défaut 200.
+   \item La durée de sommeil du process VACUUM en millisecondes est: \textbf{vacuum\_cost\_delay}. Valeur par défaut 0.
+
+\end{itemize}
+
+\begin{tiny}
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-resource.html\#RUNTIME-CONFIG-RESOURCE-VACUUM-COST}
+\end{toile}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Comment est calculé le coût du VACUUM}
+
+\begin{itemize}
+   \item Les différents critères utilisés pour calculer le coût d'un VACUUM sont:
+   \begin{itemize}
+      \item \textbf{vacuum\_cost\_page\_hit}: Coût de verrouillage du buffer, recherche et scan de la page associée. Valeur par défaut: 1
+      \item \textbf{vacuum\_cost\_page\_miss}: Coût de verrouillage, récupération de la page depuis le disque et scan. Valeur par défaut: 2
+      \item \textbf{vacuum\_cost\_page\_dirty}: Coût de modification d'une page par le VACUUM (gel, table de visibilité, \ldots). I/O nécessaire pour écrire la page en disque. Valeur par défaut: 20
+   \end{itemize}
+   \item Ces paramètres de coût s'appliquent sur l'ensemble des workers et sont répartis sur cet ensemble.
+   \item Cependant, lorsqu'un worker traite une table ayant positionné \textbf{autovacuum\_vacuum\_cost\_delay} ou \textbf{autovacuum\_vacuum\_cost\_limit}, les coûts induits par ce traitement ne sont pas inclus dans les coûts globaux.
+\end{itemize}
+
+\begin{tiny}
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-resource.html\#RUNTIME-CONFIG-RESOURCE-VACUUM-COST}
+\end{toile}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Traitement des verrous par l'autovacuum}
+
+\begin{itemize}
+   \item Les workers autovacuum ne bloquent pas les autres process en général
+   \item Si un process essaie d'acquérir un verrou de type \textbf{SHARE UPDATE EXCLUSIVE} qui entre en collision avec l'autovacuum, l'autovacuum est interrompu
+   \item Dans le cas où l'autovacuum démarre pour prévenir le pli des identifiants de transaction (XID wraparound), celui-ci n'est pas interruptible
+   \item La requête lancée par l'autovacuum dans ce cas se termine par la chaîne "(to prevent wraparound)" dans la vue pg\_stat\_activity
+   \item Le lancement fréquent de commandes qui réclame des verrous de type \textbf{SHARE UPDATE EXCLUSIVE} empêche l'autovacuum de se terminer systématiquement
 \end{itemize}
 
 \end{frame}
