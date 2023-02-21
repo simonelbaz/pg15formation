@@ -4,6 +4,107 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Histoire brève de PostgreSQL - POSTGRES}
+
+   \begin{itemize}
+      \item PostgreSQL est dérivé du projet POSTGRES amorcé par l'Université de Californie à Berkeley
+      \item POSTGRES est né en 1986 et a été financé par:
+      \item le DARPA (Defense Advanced Research Projects Agency)
+      \item l'ARO (Army Research Office)
+      \item le NSF (National Science Foundation)
+      \item ESL Inc.
+      \item POSTGRES a été utilisé par différents projets universitaires.
+      \item Illustra Information Technologies qui a fusionné avec Informix, rachetée par IBM commercialise le code dans les années 90
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/history.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Postgres95}
+
+   \begin{itemize}
+      \item En 1993, la communauté d'utilisateurs double de taille.
+      \item La maintenance du projet devient très chronophage pour les équipes de recherche universitaires qui décident de mettre fin au projet avec la publication finale de la version 4.2
+      \item En 1994, Andrew Yu et Jolly Chen ajoutent un interpréteur SQL à POSTGRES
+      \item Le projet change de nom pour devenir Postgres95, l'héritier open source de POSTGRES
+      \item Postgres95 est entièrement écrit en ANSI C et son code est réduit de 25%.
+      \item Postgres95 v1.0 est 30-50\% plus rapide que POSTGRES
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{PostgreSQL}
+
+   \begin{itemize}
+      \item Le langage PostQUEL est définitivement abandonné au profit de SQL
+      \item Le client psql est développé. Il utilise la librairie GNU readline
+      \item Le support des grands objets (Large Objects) est mis en place
+      \item En 1996, Postgres95 devient PostgreSQL car il semble important que l'année ne figure pas dans le nom
+      \item Il est aussi possible de l'appeler Postgres (en référence à son ancêtre)
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Présentation de l'écosystème PostgreSQL}
+
+   \begin{itemize}
+      \item La communauté PostgreSQL met à disposition un nombre assez important d'outils pour faciliter la vie des utilisateurs et des administrateurs
+      \item Les outils suivants vont être présentées durant cette formation:
+      \begin{itemize}
+         \item POWA
+         \item pgBadger
+         \item pgAdmin4
+      \end{itemize}
+   \end{itemize}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{POWA}
+
+   \begin{itemize}
+      \item PoWA signifie "PostgreSQL Workload Analyzer"
+      \item Il supporte PostgreSQL 9.4+
+      \item PoWA permet de collecter, agréger et purger des statistiques sur plusieurs instances PostgreSQL depuis plusieurs extensions statistiques
+      \item En fonction des besoins de l'utilisateur, PoWA fonctionne avec 2 modes:
+   \begin{itemize}
+         \item en utilisant le \textbf{background worker}. Ce fonctionnement est adapté aux environnements mono instances. Il nécessite un redémarrage de la base.
+         \item en utilisant le \textbf{PoWA collector}. Ne nécessite pas de redémarrage, collecte les informations depuis plusieurs bases, le standby inclus
+   \end{itemize}
+
+   \end{itemize}
+
+\begin{tiny}
+\begin{toile}
+\toileurl{https://powa.readthedocs.io/en/latest/}
+\end{toile}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{POWA - modules de statistiques}
+
+   \begin{itemize}
+      \item Les modules de statistiques supportés par PoWA sont:
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}{Cycle des données dans PostgreSQL}
 
 \begin{figure}

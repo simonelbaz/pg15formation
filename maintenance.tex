@@ -737,9 +737,9 @@ analyze threshold = analyze base threshold + analyze scale factor * number of tu
 \begin{frame}[fragile]{Troubleshooting de la réindexation concurrente}
 
 \begin{itemize}
-   \item En cas d'erreur de rebuild de l'index, la commande \commande{\d} appliquée à la table permet de vérifier l'état des index de la table:
+   \item En cas d'erreur de rebuild de l'index, la commande \textbackslash d appliquée à la table permet de vérifier l'état des index de la table:
 \begin{tiny}
-\begin{Verbatim}[commandchars=\\\{\}]
+\begin{Verbatim}[commandchars=\&\`\!]
    postgres=# \d tab
        Table "public.tab"
  Column |  Type   | Modifiers
