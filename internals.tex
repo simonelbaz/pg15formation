@@ -1,6 +1,4 @@
-\section{Point In Time Recovery}
-
-\subsectionpage{Internals}
+\section{Présentation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -53,6 +51,8 @@
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Ecosystème}
 
 \begin{frame}{Présentation de l'écosystème PostgreSQL}
 
@@ -262,12 +262,16 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Exercice - Installer pgBadger et tester}
+\begin{frame}{Exercice - Installer pgBadger}
 
 Installer pgBadger en suivant le lien:
 \begin{toile}
 \toileurl{https://pgbadger.darold.net/documentation.html}
 \end{toile}
+
+   \begin{itemize}
+      \item Exemple de traitement de logs
+   \end{itemize}
 
 \end{frame}
 
@@ -353,7 +357,7 @@ Installer pgBadger en suivant le lien:
 \end{tiny}
 
    \end{itemize}
-   
+
 \begin{tiny}
 \begin{toile}
 \toileurl{https://www.howtoforge.com/how-to-install-pgadmin-4-on-rocky-linux/}
@@ -367,6 +371,7 @@ Installer pgBadger en suivant le lien:
 \begin{frame}[fragile]{Exercice - Activation du mode web}
 
    \begin{itemize}
+
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 [root@localhost ~]# /usr/pgadmin4/bin/setup-web.sh
@@ -379,11 +384,57 @@ You can now start using pgAdmin 4 in web mode at http://127.0.0.1/pgadmin4
 \end{Verbatim}
 \end{tiny}
 
+Pour accéder au serveur web depuis le PC, merci de créer le tunnel SSH équivalent avec PuttY:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# ssh -L 9090:10.10.10.28:80 hqpg-sandbox
+\end{Verbatim}
+\end{tiny}
+
+Puis entrer l'URL:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+http://127.0.0.1:9090/pgadmin4
+\end{Verbatim}
+\end{tiny}
+
 \end{itemize}
-   
+
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - pgadmin4 screenshots}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/pgadmin4_login.eps}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/pgadmin4_home.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - pgadmin4 screenshots}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/pgadmin4_connexiondb.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Point In Time Recovery}
 
 \begin{frame}{Cycle des données dans PostgreSQL}
 
