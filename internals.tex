@@ -239,6 +239,15 @@
       \item Requêtes les plus lentes
       \item Requêtes ayant duré le plus longtemps
       \item Requêtes les plus fréquentes
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Métriques remontées par pgBadger}
+
+   \begin{itemize}
       \item Erreurs les plus fréquentes
       \item Histogramme du temps pris par les requêtes
       \item Histogramme du temps pris par les sessions
@@ -287,6 +296,91 @@ Installer pgBadger en suivant le lien:
 \end{toile}
 \end{tiny}
 
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{pgAdmin4 - Présentation}
+
+   \begin{itemize}
+      \item Il a un menu dédié à la gestion efficace des ACLs
+      \item Débugger intégré du langage pl-pgsql
+      \item Outil de diff des schémas
+      \item Editeur de graphe ERD (Entity Relation Diagram) pour la conception et la documentation
+      \item Outils de maintenance
+      \begin{itemize}
+         \item Gestion de l'autovacuum
+         \item Tableau de bord de supervision
+         \item Sauvegarde, restauration, vacuum et analyze à la demande
+         \item Déploiement de job en SQL/shell/batch grâce un agent de programmation
+      \end{itemize}
+      \item Un grand nombre de jeu de caractères supportés
+      \item Gestion des objets PostgreSQL (table, types, vues matérialisées, \ldots)
+
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Echantillon d'objets gérés par pgAdmin4}
+
+   \begin{itemize}
+      \item Contraintes d'exclusion
+      \item Extensions
+      \item Recherche pleine de texte - Full Text Search (FTS)
+      \item Enveloppeurs de données externes - Foreign Data Wrappers
+      \item Politiques de sécurité de lignes (RLS)
+
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Installation de pgAdmin4}
+
+   \begin{itemize}
+      \item Le lien ci-dessous décrit le déploiement web d'un serveur pgAdmin4
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[linagora@localhost ~]$ sudo -i
+[root@localhost ~]# rpm --import https://www.pgadmin.org/static/packages_pgadmin_org.pub
+[root@localhost ~]# rpm -i https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-2-1.noarch.rpm
+[root@localhost ~]# dnf install -y policycoreutils-python-utils
+\end{Verbatim}
+\end{tiny}
+
+   \end{itemize}
+   
+\begin{tiny}
+\begin{toile}
+\toileurl{https://www.howtoforge.com/how-to-install-pgadmin-4-on-rocky-linux/}
+\end{toile}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Activation du mode web}
+
+   \begin{itemize}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[root@localhost ~]# /usr/pgadmin4/bin/setup-web.sh
+Setting up pgAdmin 4 in web mode on a Redhat based platform...
+...
+Email address: selbaz@linagora.com
+Password: 
+Retype password:
+You can now start using pgAdmin 4 in web mode at http://127.0.0.1/pgadmin4
+\end{Verbatim}
+\end{tiny}
+
+\end{itemize}
+   
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
