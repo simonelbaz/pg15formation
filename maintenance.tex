@@ -4,19 +4,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{EXPLAIN PLAN}
-
-   TODO
-   WIP
-
-\begin{toile}
-\toileurl{XXXX}
-\end{toile}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \begin{frame}[fragile]{Tâches de maintenance de la base de données}
 
    La base de données nécessite des opérations de maintenance régulière pour assurer un service optimal.
@@ -487,7 +474,7 @@ HINT:  Stop the postmaster and vacuum that database in single-user mode.
    \item Pour démarrer le serveur en mode single-user, lancer la commande suivante:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
-   postgres --single -D /usr/local/pgsql/data other-options my_database
+   postgres \textbf{--single} -D /usr/local/pgsql/data other-options my_database
 \end{Verbatim}
 \end{tiny}
    \item Dans ce mode, le serveur n'applique pas les mesures de sécurité pour éteindre le process en cas de "danger"
@@ -505,7 +492,7 @@ HINT:  Stop the postmaster and vacuum that database in single-user mode.
 \begin{frame}{Multi-transactions et repli des identifiants de transactions}
 
 \begin{itemize}
-   \item Il est possible qu'une ligne de table soit verrouillé par plusieurs transactions
+   \item Il est possible qu'une ligne de table soit verrouillée par plusieurs transactions
    \item Les identifiants de transactions multiples sont stockés dans le répertoire \textbf{pg\_multixact}
    \item Comme pour les transactions classiques, ils sont stockées sur 32 bits et varient entre 0 et $2^{32}$
    \item Les seuils de traitement d'une ligne et d'une table sont respectivement \textbf{vacuum\_multixact\_freeze\_min\_age} et \textbf{vacuum\_multixact\_freeze\_table\_age}

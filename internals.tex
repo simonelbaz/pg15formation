@@ -201,6 +201,8 @@
       \item Il est capable de traiter un fichier de logs à distance avec un accès SSH sans mot de passe
       \item pgBadger s'appuie sur les protocoles http et ftp pour traiter les fichiers de log distants
       \item Il peut traiter les logs de pgBouncer
+      \item Traitement incrémental des logs
+      \item Génère des rapports au format HTML
 
    \end{itemize}
 
@@ -209,19 +211,6 @@
 \toileurl{https://pgbadger.darold.net/documentation.html}
 \end{toile}
 \end{tiny}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Différentes utilisations de pgBadger}
-
-   \begin{itemize}
-      \item pgBadger peut générer des jeu de données Tsung (filtrage sur les SELECT)
-      \item Traitement incrémental des logs
-      \item Génère des rapports au format HTML
-
-   \end{itemize}
 
 \end{frame}
 
@@ -262,16 +251,32 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{Exercice - Installer pgBadger}
+\begin{frame}[fragile]{Exercice - Installer pgBadger}
 
 Installer pgBadger en suivant le lien:
-\begin{toile}
-\toileurl{https://pgbadger.darold.net/documentation.html}
-\end{toile}
 
-   \begin{itemize}
-      \item Exemple de traitement de logs
-   \end{itemize}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[root@localhost ~]# dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm https://dl.fedoraproject.org/pub/epel/epel-next-release-latest-8.noarch.rpm
+[root@localhost ~]# dnf install perl-Text-CSV_XS
+[root@localhost ~]# dnf install pgbadger
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Utilisation de pgBadger}
+
+Pour tester l'installation, on peut lancer la commande suivante:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# pgbadger --help
+\end{Verbatim}
+\end{tiny}
 
 \end{frame}
 
@@ -523,7 +528,7 @@ archive\_mode = on
       \item \textbf{archive\_library}: Binaire d'archivage des WAL
    \end{itemize}
 
-   \item Chacune des 2 valeur s'utilise au choix. Elles ne peuvent utilisées en même temps.
+   \item Chacune des 2 valeurs s'utilise au choix. Elles ne peuvent utilisées en même temps.
    \item Pour les exercices, le paramètre \textbf{archive\_command} sera utilisé.
 
 \begin{scriptsize}
@@ -556,7 +561,7 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Caractéristique des WAL}
+\begin{frame}[fragile]{Caractéristiques des WAL}
 
 \begin{itemize}
 
@@ -601,7 +606,7 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 \begin{itemize}
 
-   \item 00000001000000000000001B
+   \item \textbf{00000001}000000000000001B
    \item La timeline est représentée par les 8 premiers chiffres du nom du WAL
 
 \end{itemize}
@@ -819,7 +824,7 @@ archive\_command = 'test ! -f /mnt/server/archivedir/\%f && cp \%p /mnt/server/a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsectionpage{Exercice}
+\section{Exercice}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
