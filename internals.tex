@@ -99,7 +99,193 @@
 
    \begin{itemize}
       \item Les modules de statistiques supportés par PoWA sont:
+      \begin{itemize}
+         \item \textbf{pg\_stat\_statements} fournit des informations sur les requêtes en cours d'exécution
+         \item \textbf{pg\_qualstats} fournit des informations sur les prédicats ou les clauses \textbf{where}
+         \item \textbf{pg\_stat\_kcache} fournit des informations sur le cache de l'OS
+         \item \textbf{pg\_wait\_sampling} fournit des informations sur les événements en attente
+         \item \textbf{pg\_track\_settings} suit et garde une trace des modifications du paramétrage du serveur PostgreSQL
+      \end{itemize}
+      \item Il est également possible d'ajouter le support de HypoPG
+      \item HypoPG permet de tester des index sans avoir à les déployer réellement en base
    \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{POWA - les composants logiciels}
+
+   \begin{itemize}
+      \item \textbf{PoWA-archivist}: extension PostgreSQL de collecte des statistiques
+      \item \textbf{PoWA-collector}: démon de collecte des informations des instances distantes de PostgreSQL
+      \item \textbf{PoWA-web}: interface web de PoWA
+   \end{itemize}
+
+   Remarque: Il est préférable de ne pas déployer PoWA sur un environnement de production car les performances peuvent être négativement impactés
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{POWA - Exercice }
+
+   \begin{itemize}
+      \item Déployer PoWA en suivant le lien: https://powa.readthedocs.io/en/latest/quickstart.html
+   \end{itemize}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{POWA - Login}
+
+   Fenêtre de login
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/powa_login.eps}
+\end{center}
+\end{figure}
+
+   Tests réalisés par Akrem JELASSI
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{POWA - Ajout d'une base de données}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/powa_ajout_base1.eps}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/powa_ajout_base2.eps}
+\end{center}
+\end{figure}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{POWA - Visualisation des métriques}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/powa_metrics1.eps}
+\end{center}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/powa_metrics2.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{pgBadger}
+
+   \begin{itemize}
+      \item pgBadger est un analyseur de logs rapide
+      \item Il accepte un ou plusieurs fichiers de logs
+      \item Il traite également les données fournies par l'entrée standard
+      \item Il est capable de traiter un fichier de logs à distance avec un accès SSH sans mot de passe
+      \item pgBadger s'appuie sur les protocoles http et ftp pour traiter les fichiers de log distants
+      \item Il peut traiter les logs de pgBouncer
+
+   \end{itemize}
+
+\begin{tiny}
+\begin{toile}
+\toileurl{https://pgbadger.darold.net/documentation.html}
+\end{toile}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Différentes utilisations de pgBadger}
+
+   \begin{itemize}
+      \item pgBadger peut générer des jeu de données Tsung (filtrage sur les SELECT)
+      \item Traitement incrémental des logs
+      \item Génère des rapports au format HTML
+
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Métriques remontées par pgBadger}
+
+   Les métriques suivantes sont remontées par pgBadger:
+   \begin{itemize}
+      \item Statistiques globales
+      \item Requêtes les plus fréquemment en attente
+      \item Requêtes ayant attendu le plus longtemps
+      \item Requêtes ayant généré le plus fréquemment des fichiers temporaires
+      \item Requêtes ayant généré les plus grands fichiers temporaires
+      \item Requêtes les plus lentes
+      \item Requêtes ayant duré le plus longtemps
+      \item Requêtes les plus fréquentes
+      \item Erreurs les plus fréquentes
+      \item Histogramme du temps pris par les requêtes
+      \item Histogramme du temps pris par les sessions
+      \item Utilisateurs des requêtes les plus fréquentes
+      \item Applications des requêtes les plus fréquentes
+      \item Requêtes générant le plus d'annulation
+      \item Requêtes les plus annulées
+      \item Requêtes de type prepare/bind durant le plus longtemps
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Exercice - Installer pgBadger et tester}
+
+Installer pgBadger en suivant le lien:
+\begin{toile}
+\toileurl{https://pgbadger.darold.net/documentation.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{pgAdmin4 - Présentation}
+
+   \begin{itemize}
+      \item pgAdmin4 est un outil d'administration de base de données PostgreSQL
+      \item Il est multi-plateforme (Microsoft Windows, Linux, MacOS)
+      \item Il a une documentation fournie et détaillée
+      \item Il possède 2 modes de déploiement:
+      \begin{itemize}
+         \item le mode desktop
+         \item le mode serveur, multi-utilisateurs avec un accès web
+      \end{itemize}
+      \item Il intègre un éditeur de requêtes SQL avec coloration syntaxique
+      \item Les données sont affichées rapidement dans une grille interactive
+      \item Le plan d'exécution de la requête est affichée de manière ergonomique
+
+   \end{itemize}
+
+\begin{tiny}
+\begin{toile}
+\toileurl{https://www.pgadmin.org/}
+\end{toile}
+\end{tiny}
 
 \end{frame}
 
