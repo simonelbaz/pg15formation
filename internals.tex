@@ -7,10 +7,12 @@
    \begin{itemize}
       \item PostgreSQL est dérivé du projet POSTGRES amorcé par l'Université de Californie à Berkeley
       \item POSTGRES est né en 1986 et a été financé par:
-      \item le DARPA (Defense Advanced Research Projects Agency)
-      \item l'ARO (Army Research Office)
-      \item le NSF (National Science Foundation)
-      \item ESL Inc.
+      \begin{itemize}
+         \item le DARPA (Defense Advanced Research Projects Agency)
+         \item l'ARO (Army Research Office)
+         \item le NSF (National Science Foundation)
+         \item ESL Inc.
+      \end{itemize}
       \item POSTGRES a été utilisé par différents projets universitaires.
       \item Illustra Information Technologies qui a fusionné avec Informix, rachetée par IBM commercialise le code dans les années 90
    \end{itemize}
@@ -30,7 +32,7 @@
       \item La maintenance du projet devient très chronophage pour les équipes de recherche universitaires qui décident de mettre fin au projet avec la publication finale de la version 4.2
       \item En 1994, Andrew Yu et Jolly Chen ajoutent un interpréteur SQL à POSTGRES
       \item Le projet change de nom pour devenir Postgres95, l'héritier open source de POSTGRES
-      \item Postgres95 est entièrement écrit en ANSI C et son code est réduit de 25%.
+      \item Postgres95 est entièrement écrit en ANSI C et son code est réduit de 25\%.
       \item Postgres95 v1.0 est 30-50\% plus rapide que POSTGRES
    \end{itemize}
 
@@ -128,12 +130,112 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{POWA - Exercice }
+\begin{frame}[fragile]{POWA - Exercice }
 
    \begin{itemize}
       \item Déployer PoWA en suivant le lien: https://powa.readthedocs.io/en/latest/quickstart.html
    \end{itemize}
 
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[root@localhost ~]# dnf install postgresql15-contrib
+[root@localhost ~]# dnf install powa_15 pg_qualstats_15 pg_stat_kcache_15 hypopg_15
+\end{Verbatim}
+\end{tiny}
+
+   Modifier la ligne suivante dans \textbf{postgresql.conf}:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+shared_preload_libraries = 'pg_stat_statements,powa,pg_stat_kcache,pg_qualstats,hypopg'
+\end{Verbatim}
+\end{tiny}
+
+Puis redémarrer le service PostgreSQL:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[root@localhost ~]# systemctl restart postgresql-15.service
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{POWA - Exercice - Installation des extensions}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[root@localhost ~]# su - postgres
+Dernière connexion : mercredi 22 février 2023 à 13:16:44 EST sur pts/1
+[postgres@localhost ~]$ psql
+psql (15.2)
+Saisissez « help » pour l'aide.
+
+postgres=# CREATE DATABASE powa;
+CREATE DATABASE
+postgres=# \c powa
+Vous êtes maintenant connecté à la base de données « powa » en tant qu'utilisateur « postgres ».
+powa=# CREATE EXTENSION pg_stat_statements;
+CREATE EXTENSION
+powa=# CREATE EXTENSION btree_gist;
+CREATE EXTENSION
+powa=# CREATE EXTENSION powa;
+CREATE EXTENSION
+postgres=# CREATE EXTENSION hypopg;
+CREATE EXTENSION
+postgres=# CREATE ROLE powa SUPERUSER LOGIN PASSWORD 'astrongpassword' ;
+CREATE ROLE
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{POWA - Exercice - Installation de l'interface web}
+
+   Installer le paquet powa\_15-web:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[root@localhost ~]# dnf install powa_15-web
+\end{Verbatim}
+\end{tiny}
+
+   Créer le fichier \textbf{/etc/powa-web.conf}:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+   servers={
+  'main': {
+    'host': 'localhost',
+    'port': '5432',
+    'database': 'powa'
+  }
+}
+cookie_secret="linagora"
+\end{Verbatim}
+\end{tiny}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[root@localhost ~]# powa-web
+[I 230222 18:01:27 powa-web:13] Starting powa-web on http://0.0.0.0:8888/
+\end{Verbatim}
+\end{tiny}
+
+Pour accéder au serveur web depuis le PC, merci de créer le tunnel SSH équivalent avec PuttY:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# ssh -L 8888:10.10.10.28:8888 hqpg-sandbox
+\end{Verbatim}
+\end{tiny}
+
+Puis entrer l'URL:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+http://localhost:8888/
+\end{Verbatim}
+\end{tiny}
 
 \end{frame}
 
