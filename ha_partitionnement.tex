@@ -61,10 +61,33 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Présentation des indexes B-Tree}
+
+   \begin{itemize}
+      \item WIP
+
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/btree.html}
+\toileurl{https://www.postgresql.org/docs/15/btree-implementation.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Tables partitionnées}
 
-   TODO
-   WIP
+   \begin{itemize}
+      \item PostgreSQL supporte le partitionnement de données.
+      \item Le partitionnement PostgreSQL consiste à découper une table logique en plusieurs petits morceaux physiques
+      \item Dans certaines situations, le partitionnement a plusieurs avantages:
+      \begin{itemize}
+         \item lorsque les données accédées sont localisées dans une partition ou un nombre réduit de partitions. A ce moment, la partie haute des indexes (B-Tree) qui correspond à ces données est entièrement en cache.
+      \end{itemize}
+
+   \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/ddl-partitioning.html}
