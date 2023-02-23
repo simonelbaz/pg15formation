@@ -204,8 +204,8 @@ CREATE ROLE
 
    Créer le fichier \textbf{/etc/powa-web.conf}:
 \begin{tiny}
-\begin{Verbatim}[commandchars=\&\{\}]
-   servers={
+\begin{Verbatim}[commandchars=\&\#\#]
+servers={
   'main': {
     'host': 'localhost',
     'port': '5432',
@@ -368,6 +368,41 @@ http://localhost:8888/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Exercice - Paramétrage préalable de PostgreSQL}
+
+   Vérifier que la ligne suivante est présente dans postgresql.conf:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+log_min_duration_statement = 0
+\end{Verbatim}
+\end{tiny}
+
+Les lignes du journal doivent avoir un minimum d'information:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+log_line_prefix = '%t [%p]: '
+log_checkpoints = on
+log_connections = on
+log_disconnections = on
+log_lock_waits = on
+log_temp_files = 0
+log_autovacuum_min_duration = 0
+log_error_verbosity = default
+\end{Verbatim}
+\end{tiny}
+
+   \textbf{Remarques:}
+\begin{itemize}
+   \item Ne pas activer l'option log\_statement car son format ne peut être traité par pgBadger
+   \item pgBadger est restreint aux messages de log en anglais. Il ne peut traiter des logs en langue française.
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Exercice - Utilisation de pgBadger}
 
 Pour tester l'installation, on peut lancer la commande suivante en tant que \textbf{postgres}:
@@ -375,8 +410,11 @@ Pour tester l'installation, on peut lancer la commande suivante en tant que \tex
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 # pgbadger --help
+# pgbadger /var/lib/pgsql/15/data/log/postgresql-Wed.log -o /var/www/html/pgbadger.html
 \end{Verbatim}
 \end{tiny}
+
+Ce rapport peut ensuite être visualisé avec un navigateur web.
 
 \end{frame}
 
@@ -1338,7 +1376,7 @@ createdb -T template0 dbname
 \end{itemize}
 
 \begin{toile}
-\toileurl{XXX}
+\toileurl{https://www.postgresql.org/docs/15/charset.html}
 \end{toile}
 
 \end{frame}
