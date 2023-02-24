@@ -27,14 +27,13 @@
 
 
    \begin{itemize}
-      \item Space Partitioned GiST (SP-GiST) - similar au GiST, l'implémentation de cet index supporte les arbres partitionnés par espace, les arbres k-d et radix
-      \item Generalized Inverted Index (GIN) - utile pour indexer les valeurs det type tableau et tester la présence d'un élément
-      \item Block Range Index (BRIN) - ce type d'index stocke des résumés d'information pour des blocs de rangées de tableau
+      \item Space Partitioned GiST (SP-GiST) - similar au GiST, cette classe d'index supporte des structures de données non équilibrées
+      \item Generalized Inverted Index (GIN) - utile pour indexer des valeurs de type multi-composants comme des tableaux. et tester la présence d'un élément
+      \item Tout comme la famille GiST, la famille GIN supporte des stratégies d'indexation personnalisables par l'utilisateur. Les opérateurs de la cette classe d'index dépendent de la stratégie d'indexation.
+      \item Block Range Index (BRIN) - ce type d'index stocke des résumés d'information pour des blocs contigus et physiques de données. Ce type d'index est bien adapté aux données corrélées avec l'ordre physique de stockage
+      \item Tout comme la famille GiST, la famille BRIN supporte des stratégies d'indexation personnalisables par l'utilisateur. Les opérateurs de la cette classe d'index dépendent de la stratégie d'indexation.
+      \item L'index de type BRIN contient le min et le max de chaque bloc de données linéaire
    \end{itemize}
-
-\begin{toile}
-\toileurl{https://www.postgresql.org/docs/15/indexes-types.html}
-\end{toile}
 
 \end{frame}
 
