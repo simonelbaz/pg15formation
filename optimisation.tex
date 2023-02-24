@@ -4,6 +4,42 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Les indexes dans PostgreSQL}
+
+
+   \begin{itemize}
+      \item B-Tree Index - très utile pour la recherche d'une valeur ou le scan d'une plage de valeur. Utilisé également pour les expressions régulières (pattern matching)
+      \item Hash Index - très efficace pour recherche de valeurs égales
+      \item Generalized Search Tree (GiST) - est une catégorie d'index offrant une architecture dans laquelle plusieurs stratégies d'indexes peuvent être implémentées. En fonction de ces stratégies, des opérateurs (\textit{operator class}) sont définies.
+      \item Par exemple, la distribution standard de PostgreSQL inclut des opérateurs de classe GisT pour les types de données à 2 dimensions
+      \item Les indexes GiST sont aussi capables d'optimiser les recherches de type \textbf{"voisinage le plus proche"}
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/indexes-types.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Les indexes dans PostgreSQL}
+
+
+   \begin{itemize}
+      \item Space Partitioned GiST (SP-GiST) - similar au GiST, l'implémentation de cet index supporte les arbres partitionnés par espace, les arbres k-d et radix
+      \item Generalized Inverted Index (GIN) - utile pour indexer les valeurs det type tableau et tester la présence d'un élément
+      \item Block Range Index (BRIN) - ce type d'index stocke des résumés d'information pour des blocs de rangées de tableau
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/indexes-types.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{EXPLAIN PLAN}
 
    TODO
