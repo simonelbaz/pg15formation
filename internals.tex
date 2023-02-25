@@ -54,6 +54,22 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Exercice - Installer PostgreSQL 15 sur les serveurs de formation}
+
+   \begin{itemize}
+      \item Installer le serveur PostgreSQL sur les serveurs \textbf{hqpg-0x} et \textbf{hqpg-0x-repl}
+      \item Les serveurs ont pour OS Rocky Linux version 8
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/download/linux/redhat/}
+\toileurl{https://rockylinux.org/}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Ecosystème}
 
 \begin{frame}{Présentation de l'écosystème PostgreSQL}
@@ -599,8 +615,14 @@ http://127.0.0.1:9090/pgadmin4
 
 \begin{frame}{Multiversion Concurrency Control - MVCC}
 
-
-   WIP
+   \begin{itemize}
+      \item PostgreSQL fournit un grand nombre d'outils pour gérer l'accès concurrentiel aux données
+      \item De manière interne, la ochérence des données est mise en place en utilisant un modèle multi-versions (MVCC)
+      \item Cela signifie que chaque requête SQL a la vision d'un instantané des données (snapshot)
+      \item Cet instantané correspond à une version de la base de données il y a quelques instants, quelques soient les modifications actuellement réalisées sur les données
+      \item Cela empêche les requêtes de voir des données incohérentes modifiées par des requêtes parallèle
+      \item Cette méthode fournit l'isolation transactionnelle pour chaque session de la base des données
+   \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/mvcc-intro.html}
@@ -610,39 +632,17 @@ http://127.0.0.1:9090/pgadmin4
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}{L'importance des sauvegardes}
+\begin{frame}{Multiversion Concurrency Control - MVCC}
 
-\begin{itemize}
-
-\item Il est important de posséder 2 copies supplémentaires à la copie des données de productions.
-\item Une des 2 copies se situe hors site.
-\item Chacune des 2 copies est stockée sur un média différent.
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{https://www.it-connect.fr/sauvegarde-quest-ce-que-la-regle-du-3-2-1/}
-\end{toile}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}[fragile]{Différents types de sauvegardes}
-
-Il existe différents types de sauvegarde:
-
-\begin{itemize}
-
-   \item logique avec les commandes \commande{pg\_dump} et \commande{pg\_dumpall}
-   \item au niveau du système de fichiers avec la commande \commande{tar}.\footnote{La sauvegarde du système de fichiers n'est pas recommandée par la documentation officielle de PostgreSQL}
-   \item binaire avec la commande \commande{pg\_basebackup}
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{https://www.postgresql.org/docs/15/backup.html}
-\end{toile}
+   \begin{itemize}
+      \item Le MVCC en évitant les méthodes de verrouillage des bases de données classiques minimise la contention et favorise la performance dans un environnement multi-utilisateurs
+      \item En cas de nécessité de verrouillage, il existe différents type de verrous:
+      \begin{itemize}
+         \item le verrouillage en lecture
+         \item le verrouillage en écriture
+         \item ces 2 types de verrous ne se gênent pas mutuellement: un verrou en lecture n'empêche pas l'écriture et vice-versa 
+      \end{itemize}
+   \end{itemize}
 
 \end{frame}
 

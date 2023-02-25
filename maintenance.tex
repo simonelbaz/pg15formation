@@ -785,3 +785,41 @@ Indexes:
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{L'importance des sauvegardes}
+
+\begin{itemize}
+
+\item Il est important de posséder 2 copies supplémentaires à la copie des données de productions.
+\item Une des 2 copies se situe hors site.
+\item Chacune des 2 copies est stockée sur un média différent.
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.it-connect.fr/sauvegarde-quest-ce-que-la-regle-du-3-2-1/}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Différents types de sauvegardes}
+
+Il existe différents types de sauvegarde:
+
+\begin{itemize}
+
+   \item logique avec les commandes \commande{pg\_dump} et \commande{pg\_dumpall}
+   \item au niveau du système de fichiers avec la commande \commande{tar}.\footnote{La sauvegarde du système de fichiers n'est pas recommandée par la documentation officielle de PostgreSQL}
+   \item binaire avec la commande \commande{pg\_basebackup}
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/backup.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
