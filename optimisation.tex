@@ -30,10 +30,69 @@
       \item Space Partitioned GiST (SP-GiST) - similar au GiST, cette classe d'index supporte des structures de données non équilibrées
       \item Generalized Inverted Index (GIN) - utile pour indexer des valeurs de type multi-composants comme des tableaux. et tester la présence d'un élément
       \item Tout comme la famille GiST, la famille GIN supporte des stratégies d'indexation personnalisables par l'utilisateur. Les opérateurs de la cette classe d'index dépendent de la stratégie d'indexation.
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Les indexes dans PostgreSQL}
+
+
+   \begin{itemize}
       \item Block Range Index (BRIN) - ce type d'index stocke des résumés d'information pour des blocs contigus et physiques de données. Ce type d'index est bien adapté aux données corrélées avec l'ordre physique de stockage
       \item Tout comme la famille GiST, la famille BRIN supporte des stratégies d'indexation personnalisables par l'utilisateur. Les opérateurs de la cette classe d'index dépendent de la stratégie d'indexation.
       \item L'index de type BRIN contient le min et le max de chaque bloc de données linéaire
    \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Pistes d'optimisation}
+
+   \begin{itemize}
+      \item La quantité de \textbf{shared\_buffers}: elle peut occuper 1/4 de la RAM disponible
+      \item \textbf{work\_mem} est la quantité de RAM allouée à chaque process de traitement d'une session
+      \item \textbf{effective\_cache\_size} est la quantité de RAM que le planificateur de requête a à sa disposition. En cas de valeur importante, il va privilégier l'utilisation des indexes. Pour une valeur plus faible, il privilégie les scans séquentiels.
+      \item \textbf{effective\_io\_concurrency} est le nombre d'opération I/O que le serveur PostgreSQL peut exécuter en parallle sur un disque
+      \item activation des Huge Pages
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-query.html}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-resource.html\#RUNTIME-CONFIG-RESOURCE-ASYNC-BEHAVIOR}
+\toileurl{https://smartsla.08000linux.com/requests/1009}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Activation des Huge Pages du kernel}
+
+   \begin{itemize}
+      \item L'utilisation des Huge Pages Kernel permet d'allouer des pages de RAM plus imortantes au process PostgreSQL
+      \item Il minimise les appels Kernel pour l'allocation de RAM
+   \end{itemize}
+
+   Pour vérifier que les Huge Pages sont activées, la commande suivante peut être utilisée:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# cat /proc/meminfo | grep Huge
+AnonHugePages:  247808 kB
+HugePages_Total:  19781
+HugePages_Free:  16193
+HugePages_Rsvd:   5193
+HugePages_Surp:    0
+Hugepagesize:    2048 kB
+\end{Verbatim}
+\end{tiny}
+
+\begin{toile}
+\toileurl{https://www.kernel.org/doc/html/latest/admin-guide/mm/hugetlbpage.html}
+\end{toile}
 
 \end{frame}
 

@@ -4,6 +4,44 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Les différents niveaux de verrouillage dans PostgreSQL}
+
+Il existe différents niveaux de verrouillage dans PostgreSQL. Ces niveaux sont:
+   \begin{itemize}
+      \item table
+      \item ligne
+      \item page
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/explicit-locking.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Les deadlocks - Verrouillages mortels}
+
+   \begin{itemize}
+      \item PostgreSQL est capable de détecter les deadlocks
+      \item Dans cette situation, le serveur arrête l'une des sessions bloquantes
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Les verrous de niveau table}
+
+   \begin{itemize}
+      \item WIP
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Le schéma \textit{information}}
 
 

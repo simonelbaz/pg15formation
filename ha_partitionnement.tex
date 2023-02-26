@@ -72,9 +72,6 @@
       \end{itemize}
       \item Les feuilles correspondent aux données dans les tables
       \item Chaque noeud intermédiaire porte un nombre de \textbf{clefs} maximum et minimum
-      \item Les \textbf{clés} définissent les bornes minimum et maximum des valeurs portées par les noeuds enfants
-      \item Lorsqu'un noeud atteint son nombre maximum d'enfants, une scission ("split") a lieu
-      \item Lorsqu'un noeud atteint son nombre minimum d'enfants, une fusion ("merge") a lieu
 
    \end{itemize}
 
@@ -83,6 +80,19 @@
 \toileurl{https://www.postgresql.org/docs/15/btree.html}
 \toileurl{https://www.postgresql.org/docs/15/btree-implementation.html}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Présentation des indexes B-Tree}
+
+   \begin{itemize}
+      \item Les \textbf{clés} définissent les bornes minimum et maximum des valeurs portées par les noeuds enfants
+      \item Lorsqu'un noeud atteint son nombre maximum d'enfants, une scission ("split") a lieu
+      \item Lorsqu'un noeud atteint son nombre minimum d'enfants, une fusion ("merge") a lieu
+
+   \end{itemize}
 
 \end{frame}
 
@@ -138,6 +148,251 @@
          \item les données ou partitions les moins utilisées peuvent être migrées vers des disques moins onéreux et moins rapides
       \end{itemize}
 
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{A quel moment faire le choix d'une table partitionnée}
+
+   \begin{itemize}
+      \item Il peut être intéressant de partitionner une table lorsque sa taille dépasse celle de la quantité de RAM du serveur
+      \item Il existe différents types de partitionnement:
+      \begin{itemize}
+         \item Partitionnement par plage (Range partitioning)
+         \item Partitionnement par liste (List partitioning)
+         \item Partitionnement par hash (Hash partitioning)
+      \end{itemize}
+
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Partitionnement par plage (Range partitioning)}
+
+   \begin{itemize}
+      \item La plage de valeurs est portée par une ou plusieurs colonnes
+      \item Les valeurs peuvent être de type date ou identifiants
+      \item Les plages n'ont pas d'intersection: elles n'ont pas de valeurs en commun
+      \item Le min de la plage est inclus, le max est exclus
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Partitionnement par liste (List partitioning)}
+
+   \begin{itemize}
+      \item La plage de valeurs est définie par une liste qui indique les valeurs autorisées dans la partition
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Partitionnement par hash (Hash partitioning)}
+
+   \begin{itemize}
+      \item La clé de partitionnement est définie par un modulo et un reste
+      \item La valeur est autorisée dans la partition lorsque son modulo est égale au reste de la partition
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Stockage des tables partitionnées}
+
+   \begin{itemize}
+      \item Une table partitionnée est virtuelle. Elle ne possède pas de stockage.
+      \item Ce sont ses partitions qui occupent du stockage
+      \item Chaque partitiotn récupère une partie des données de la table
+      \item Chaque ligne est oritentée vers la partition en fonction de la valeur de la clef de partition
+      \item Lorsque la clef de partition est mise à jour, la ligne est déplacée vers la parition qui correspond à la nouvelle clef
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Sous partitions}
+
+   \begin{itemize}
+      \item Une partition peut elle même être partitionnée
+      \item Les partitions ont les mêmes colonnes que leurs parents
+      \item Cependant, elles peuvent définir leurs propres indexes, valeurs par défaut et contraintes
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/sql-createtable.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Conversion des tables en tables partitionnées}
+
+   \begin{itemize}
+      \item Il n'est pas possible de transformer une table en une table partitionnée et inversement
+      \item Il est possible d'ajouter une partition à une table partionnée
+      \item Il est possible d'ajouter une table partitionnée à une table partionnée en tant que partition
+      \item Il est possible de transformer une partition d'une table en une table régulière
+      \item Ces possibilités facilitent la maintenance des tables partitionnées
+      \item Les tables étrangères (\textbf{foreign tables}) peuvent jouer aussi le rôle de partitions
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/sql-altertable.html}
+\toileurl{https://www.postgresql.org/docs/15/ddl-foreign-data.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{\textbf{enable\_partition\_pruning}}
+
+   \begin{itemize}
+      \item Ce paramètre autorise le planificateur de requêtes d'élaguer certaines partitions de tables de son plan d'exécution
+      \item Valeur par défaut \textbf{on}
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-query.html\#GUC-ENABLE-PARTITION-PRUNING}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Manipuler des tables partitionnées}
+
+   \begin{itemize}
+      \item Suivre l'exercice paragraphe Example dans https://www.postgresql.org/docs/15/ddl-partitioning.html
+      \item Créer une table partitionnée
+      \item Ajouter une sous-partition
+      \item Ajouter un index à une partition
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Maintenance des partitions - Suppression d'une partition}
+
+   \begin{itemize}
+      \item Il y a 2 possibilités pour supprimer une partition d'une table:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+   DROP TABLE measurement\_y2006m02;
+\end{Verbatim}
+\end{tiny}
+      \item L'autre possibilité est:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+ALTER TABLE measurement DETACH PARTITION measurement\_y2006m02;
+-- ou
+ALTER TABLE measurement DETACH PARTITION measurement\_y2006m02 \textbf{CONCURRENTLY};
+\end{Verbatim}
+\end{tiny}
+      \item Elle permet de réaliser un dump ou une sauvegarde de la partition avant suppression définitive
+      \item La clause \textbf{CONCURRENTLY} permet une modification de la table parente en parallèle
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Maintenance des partitions - Ajout d'une partition - \textbf{ATTACH}}
+
+   \begin{itemize}
+      \item Comme pour la suppression, il y a 2 possibilités pour ajouter une partition à une table:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+CREATE TABLE measurement_y2008m02 PARTITION OF measurement
+FOR VALUES FROM ('2008-02-01') TO ('2008-03-01')
+TABLESPACE fasttablespace;
+\end{Verbatim}
+\end{tiny}
+      \item L'autre possibilité est de créer une table en dehors de la table partitionnée puis de la rattacher:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\#\{\}]
+CREATE TABLE measurement\_y2008m02
+(LIKE measurement INCLUDING DEFAULTS INCLUDING CONSTRAINTS)
+TABLESPACE fasttablespace;
+
+ALTER TABLE measurement_y2008m02 ADD CONSTRAINT y2008m02
+   CHECK ( logdate >= DATE '2008-02-01' AND logdate < DATE '2008-03-01' );
+
+\copy measurement_y2008m02 from 'measurement_y2008m02'
+-- possibly some other data preparation work
+
+ALTER TABLE measurement ATTACH PARTITION measurement_y2008m02
+    FOR VALUES FROM ('2008-02-01') TO ('2008-03-01' );
+\end{Verbatim}
+\end{tiny}
+      \item Noter l'utilisation du \textbf{LIKE} qui permet de dupliquer la définition de la table
+      \item \textbf{Remarque}: Il est important d'ajouter la vérification \textbf{CHECK} avant d'attacher la partition. Cela évite un scan verrouillé en \textbf{ACCESS LOCK} sur la partition.
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Maintenance des partitions - Ajout d'une partition - \textbf{ATTACH}}
+
+   \begin{itemize}
+      \item La clause de vérification avant l'\textbf{ATTACH} est importante en cas de présence d'une partition \textbf{DEFAULT}
+      \item Sans la clause \textbf{CHECK}, la partition qui est rattachée va être scannée en étant verrouillé afin de vérifier qu'il n'y a pas d'enregistrement susceptible d'aller en \textbf{DEFAULT}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Indexes et tables partitionnées}
+
+   \begin{itemize}
+      \item Comme vu précédemment, il est possible de créer des indexes sur des tables partitionnées
+      \item Ces indexes seront appliqués aux futures partitions
+      \item Il y a cependant une limitation: il n'est pas possible d'utiliser \textbf{CONCURRENTLY}. Il y a donc un verrou exclusif à l'ajout d'une partition
+      \item Pour éviter cela, on utilise \textbf{CREATE INDEX ON ONLY} sur la table partitionnée
+      \item L'index créé de cette manière est invalide
+      \item Il est ensuite possible d'appliquer la clause \textbf{CONCURRENTLY} sur les partitions qui seront rattachées
+      \item Une fois l'ensemble des partitions attachées avec l'index, celui-ci est validé
+      \item Cette technique s'applique aussi aux clauses \textbf{UNIQUE} et \textbf{PRIMARY KEY}
+
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Utiliser la clause \textbf{CREATE INDEX ON ONLY}}
+
+   \begin{itemize}
+      \item Merci de réaliser l'exercice de création d'index comme indiqué dans le lien https://www.postgresql.org/docs/15/ddl-partitioning.html\#DDL-PARTITION-PRUNING
+      \item au paragraphe 5.11.2.2 en utilisant CREATE INDEX ON ONLY
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Elagage (pruning) de partitions dans le planificateur de requêtes}
+
+   \begin{itemize}
+      \item Comme vu précédemment l'élagage de partitions est activé par défaut pour le planificateur de requêtes
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+\end{Verbatim}
+\end{tiny}
+      \item C
    \end{itemize}
 
 \end{frame}
