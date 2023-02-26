@@ -390,9 +390,67 @@ ALTER TABLE measurement ATTACH PARTITION measurement_y2008m02
       \item Comme vu précédemment l'élagage de partitions est activé par défaut pour le planificateur de requêtes
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
+SET enable_partition_pruning = on;                 -- the default
+SELECT count(*) FROM measurement WHERE logdate >= DATE '2008-01-01';
 \end{Verbatim}
 \end{tiny}
-      \item C
+      \item Sans l'élagage de partitions, la requête précédente aurait scanné toute la table measurement
+      \item Avec l'élagage, le planificateur détermine pour chaque partition que la donnée ne s'y trouve et ne scanne pas la partition
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Vérification avec l'EXPLAIN plan}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\#\{\}]
+SET enable_partition_pruning = \textbf{off};
+EXPLAIN SELECT count(*) FROM measurement WHERE logdate >= DATE '2008-01-01';
+                                    QUERY PLAN
+-----------------------------------------------------------------------------------
+ Aggregate  (cost=188.76..188.77 rows=1 width=8)
+   ->  Append  (cost=0.00..181.05 rows=3085 width=0)
+         ->  Seq Scan on measurement_y2006m02  (cost=0.00..33.12 rows=617 width=0)
+               Filter: (logdate >= '2008-01-01'::date)
+         ->  Seq Scan on measurement_y2006m03  (cost=0.00..33.12 rows=617 width=0)
+               Filter: (logdate >= '2008-01-01'::date)
+...
+         ->  Seq Scan on measurement_y2007m11  (cost=0.00..33.12 rows=617 width=0)
+               Filter: (logdate >= '2008-01-01'::date)
+         ->  Seq Scan on measurement_y2007m12  (cost=0.00..33.12 rows=617 width=0)
+               Filter: (logdate >= '2008-01-01'::date)
+         ->  Seq Scan on measurement_y2008m01  (cost=0.00..33.12 rows=617 width=0)
+               Filter: (logdate >= '2008-01-01'::date)   
+\end{Verbatim}
+\end{tiny}
+
+   \begin{itemize}
+      \item On peut voir que le planificateur scanne l'ensemble des partitions de la table lorsque l'élagage est désactivé
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Vérification avec l'EXPLAIN plan}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\#\{\}]
+SET enable_partition_pruning = \textbf{on};
+EXPLAIN SELECT count(*) FROM measurement WHERE logdate >= DATE '2008-01-01';
+                                    QUERY PLAN
+-----------------------------------------------------------------------------------
+ Aggregate  (cost=37.75..37.76 rows=1 width=8)
+   ->  Seq Scan on measurement_y2008m01  (cost=0.00..33.12 rows=617 width=0)
+         Filter: (logdate >= '2008-01-01'::date)
+\end{Verbatim}
+\end{tiny}
+
+   \begin{itemize}
+      \item On peut voir que le planificateur scanne la bonne partitions lorsque l'élagage est activé
+      \item Ce n'est pas la présence d'index qui va guider le planificateur mais bien les contraintes de partitionnement
    \end{itemize}
 
 \end{frame}
