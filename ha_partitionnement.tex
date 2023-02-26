@@ -64,15 +64,48 @@
 \begin{frame}[fragile]{Présentation des indexes B-Tree}
 
    \begin{itemize}
-      \item WIP
+      \item Un index de type B-Tree est un arbre composé:
+      \begin{itemize}
+         \item d'une racine
+         \item de noeuds intermédiaires
+         \item de feuilles
+      \end{itemize}
+      \item Les feuilles correspondent aux données dans les tables
+      \item Chaque noeud intermédiaire porte un nombre de \textbf{clefs} maximum et minimum
+      \item Les \textbf{clés} définissent les bornes minimum et maximum des valeurs portées par les noeuds enfants
+      \item Lorsqu'un noeud atteint son nombre maximum d'enfants, une scission ("split") a lieu
+      \item Lorsqu'un noeud atteint son nombre minimum d'enfants, une fusion ("merge") a lieu
 
    \end{itemize}
 
 \begin{toile}
+\toileurl{https://en.wikipedia.org/wiki/B-tree}
 \toileurl{https://www.postgresql.org/docs/15/btree.html}
 \toileurl{https://www.postgresql.org/docs/15/btree-implementation.html}
-\toileurl{https://git.postgresql.org/gitweb/?p=postgresql.git;a=blob_plain;f=src/backend/access/nbtree/README;hb=94851e4b905042de559d073b6590039ab4598c7c}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{L'objectif des indexes B-Tree}
+
+   \begin{itemize}
+      \item L'objectif de l'index B-Tree est de stocker en mémoire une partie d'un index très volumineux
+      \item Cet objectif est atteint par le fait que les noeuds intermédiaires indexent des plages de données
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Schéma explicatif des indexes B-Tree}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{images/b_tree.eps}
+\end{center}
+\end{figure}
 
 \end{frame}
 
@@ -83,16 +116,29 @@
    \begin{itemize}
       \item PostgreSQL supporte le partitionnement de données.
       \item Le partitionnement PostgreSQL consiste à découper une table logique en plusieurs petits morceaux physiques
-      \item Dans certaines situations, le partitionnement a plusieurs avantages:
-      \begin{itemize}
-         \item lorsque les données accédées sont localisées dans une partition ou un nombre réduit de partitions. A ce moment, la partie haute des indexes (B-Tree) qui correspond à ces données est entièrement en cache.
-      \end{itemize}
 
    \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/ddl-partitioning.html}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Tables partitionnées}
+
+   \begin{itemize}
+      \item Dans certaines situations, le partitionnement a plusieurs avantages:
+      \begin{itemize}
+         \item lorsque les données accédées sont localisées dans une partition ou un nombre réduit de partitions. A ce moment, la partie haute des indexes (B-Tree) qui correspond à ces données est entièrement en cache.
+         \item lorsque les données modifiées ou accédée couvrent la majorité de la partition, il est préférable d'utiliser un scan séquentiel au lieu d'utiliser un index
+         \item les chargements de données massifs ou suppressions massives de données correspondant à une partition sont réalisés en ajoutant une partition ou en supprimant une partition. En cas de suppression massive, un \textbf{VACUUM} est économisé
+         \item les données ou partitions les moins utilisées peuvent être migrées vers des disques moins onéreux et moins rapides
+      \end{itemize}
+
+   \end{itemize}
 
 \end{frame}
 
