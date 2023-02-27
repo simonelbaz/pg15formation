@@ -57,6 +57,85 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Notions de cluster \textbf{repmgr}}
+
+   \begin{itemize}
+      \item Les notions suivantes sont présentes dans un cluster repmgr:
+      \begin{itemize}
+         \item failover: Dans le cas de l'échec d'un noeud, le standby prend le relais et devient noeud primaire
+         \item switchover: Dans le cas d'une opération de maintenance, le DBA choisit de réaliser une basculer vers le noeud standby
+         \item fencing: Dans le cas d'une bascule failover vers le standby, il est important que l'ancien serveur primaire ne revienne pas en ligne et cause un split-brain. L'opération de fincing consiste à isoler l'ancien noeud primaire
+         \item witness server (serveur témoin): Le serveur témoin sert à mettre en place un quorum pour éviter le split brain. Il ne fait pas partie du process de réplication.
+         \item En cas de coupure réseau entre les différents noeuds, ceux qui voient le serveur témoin entrent dans un process de vote pour élire un nouveau primary
+      \end{itemize}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Eléments de la solution \textbf{repmgr}}
+
+   \begin{itemize}
+      \item Les principaux éléments de la solution repmgr sont:
+      \begin{itemize}
+         \item le démon repmgrd: Il surveille l'état de la replication, réalise le failover en cas de défaillance du serveur primaire et envoie des notifications d'événements
+         \item la commande en ligne repmgr. Elle permet d'administrer le cluster PostgreSQL
+      \end{itemize}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Déploiement de \textbf{repmgr}}
+
+   \begin{itemize}
+      \item repmgr est inclus dans les dépôts Yum Repository de PostgreSQL
+      \item Sur les serveurs hqpg-0x et hqpg-0x-repl, lancer les commandes suivantes:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# dnf list | grep repmgr
+...
+repmgr_15.x86_64                                                  5.3.3-1.rhel8                                              pgdg15       
+repmgr_15-devel.x86_64                                            5.3.3-1.rhel8                                              pgdg15       
+repmgr_15-llvmjit.x86_64                                          5.3.3-1.rhel8                                              pgdg15
+# dnf install repmgr_15
+# dnf install rsync
+\end{Verbatim}
+\end{tiny}
+      \item Paramétrer le noeud primaire en suivant le lien: https://repmgr.org/docs/current/quickstart-postgresql-configuration.html
+      \item \textbf{Remarques}: Certaines valeurs de paramètres ont changé entre les différentes versions de PostgreSQL 9.6+
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Création de la base de données \textbf{repmgr}}
+
+   \begin{itemize}
+      \item Au départ, le serveur hqpg-0x est choisi comme primaire
+      \item Sur le serveurs hqpg-0x, lancer les commandes suivantes:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# su - postgres
+# createuser -s repmgr
+# createdb repmgr -O repmgr
+[postgres@localhost ~]$ psql
+psql (15.2)
+Saisissez « help » pour l'aide.
+
+postgres=# ALTER USER repmgr SET search_path TO repmgr, "$user", public;
+ALTER ROLE
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Partitionnement des données}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
