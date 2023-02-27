@@ -218,7 +218,7 @@ repmgr=#
 node_id=1
 node_name='node1'
 conninfo='host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2'
-data_directory='/var/lib/pgsql/15'
+data_directory='/var/lib/pgsql/15/data'
 \end{Verbatim}
 \end{tiny}
    \end{itemize}
@@ -254,11 +254,70 @@ NOTICE: primary node record (ID: 1) registered
  1  | node1 | primary | * running |          | default  | 100      | 2        | host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2
 \end{Verbatim}
 \end{tiny}
-
    \end{itemize}
 
 \begin{toile}
 \toileurl{https://repmgr.org/docs/current/quickstart-primary-register.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Vérification en base}
+
+   \begin{itemize}
+      \item Vérification en base
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[postgres@localhost ~]$ psql repmgr
+psql (15.2)
+Saisissez « help » pour l'aide.
+
+repmgr=# \x
+Affichage étendu activé.
+repmgr=# select * from repmgr.nodes;
+-[ RECORD 1 ]----+-------------------------------------------------------------
+node_id          | 1
+upstream_node_id | 
+active           | t
+node_name        | node1
+type             | primary
+location         | default
+priority         | 100
+conninfo         | host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2
+repluser         | repmgr
+slot_name        | 
+config_file      | /etc/repmgr/15/repmgr.conf
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://repmgr.org/docs/current/quickstart-primary-register.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Clone du primaire vers le standby}
+
+   \begin{itemize}
+      \item Sur le serveur standby hqpg-0x-repl, créer le fichier /etc/repmgr/15/\textbf{repmgr.conf} ci-dessous
+      \item Il est important de ne pas le créer dans le répertoire data car il risque d'être écrasé ou supprimé par les opérations de réplication
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+node_id=2
+node_name='node2'
+conninfo='host=10.10.10.29 user=repmgr dbname=repmgr connect_timeout=2'
+data_directory='/var/lib/pgsql/15/data'
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://repmgr.org/docs/current/quickstart-standby-clone.html}
 \end{toile}
 
 \end{frame}
