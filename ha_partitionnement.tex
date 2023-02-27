@@ -156,7 +156,7 @@ host    repmgr        repmgr      10.10.10.0/24          trust
 \begin{Verbatim}[commandchars=\\\{\}]
 # su - postgres
 # psql
-SELECT pg_reload_conf()
+SELECT pg_reload_conf();
 \end{Verbatim}
 \end{tiny}
    \end{itemize}
@@ -211,7 +211,7 @@ repmgr=#
 \begin{frame}[fragile]{Exercice - Déploiement de \textbf{repmgr.conf}}
 
    \begin{itemize}
-      \item Sur le serveur primaire hqpg-0x, créer le fichier /var/lib/pgsql/15/\textbf{repmgr.conf} ci-dessous
+      \item Sur le serveur primaire hqpg-0x, créer le fichier /etc/repmgr/15/\textbf{repmgr.conf} ci-dessous
       \item Il est important de ne pas le créer dans le répertoire data car il risque d'être écrasé ou supprimé par les opérations de réplication
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -225,6 +225,40 @@ data_directory='/var/lib/pgsql/15'
 
 \begin{toile}
 \toileurl{https://repmgr.org/docs/current/quickstart-repmgr-conf.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Enregistrement du serveur primaire}
+
+   \begin{itemize}
+      \item Pour renregistrer le serveur primaire, lancer la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# su - postgres
+[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr -f /etc/repmgr/15/repmgr.conf primary register                                                                                              
+INFO: connecting to primary database...
+NOTICE: attempting to install extension "repmgr"
+NOTICE: "repmgr" extension successfully installed
+NOTICE: primary node record (ID: 1) registered
+\end{Verbatim}
+\end{tiny}
+      \item Vérifier le résultat de la commande:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr -f /etc/repmgr/15/repmgr.conf cluster show
+ ID | Name  | Role    | Status    | Upstream | Location | Priority | Timeline | Connection string                                           
+----+-------+---------+-----------+----------+----------+----------+----------+--------------------------------------------------------------
+ 1  | node1 | primary | * running |          | default  | 100      | 2        | host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2
+\end{Verbatim}
+\end{tiny}
+
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://repmgr.org/docs/current/quickstart-primary-register.html}
 \end{toile}
 
 \end{frame}
