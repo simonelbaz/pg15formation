@@ -136,6 +136,101 @@ ALTER ROLE
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Exercice - Paramétrage des autorisations dans \textbf{pg\_hba.conf}}
+
+   \begin{itemize}
+      \item Vérifier que les lignes suivantes sont présentes dans \textbf{pg\_hba.conf}:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+local   replication   repmgr                              trust
+host    replication   repmgr      127.0.0.1/32            trust
+host    replication   repmgr      10.10.10.0/24          trust
+
+local   repmgr        repmgr                              trust
+host    repmgr        repmgr      127.0.0.1/32            trust
+host    repmgr        repmgr      10.10.10.0/24          trust
+\end{Verbatim}
+\end{tiny}
+      \item Recharger le paramétrage avec la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# su - postgres
+# psql
+SELECT pg_reload_conf()
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Préparation du serveur standby}
+
+   \begin{itemize}
+      \item Sur le serveur standby hqpg-0x-repl, ne pas créer le base de données (pas de lancement de initdb)
+      \item Elle sera créée par réplication
+      \item Vérifier que le répertoire /var/lib/pgsql/15/data existe, qu'il appartient à postgres et a les droits unix: \textbf{0700}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[root@localhost 15]# pwd
+/var/lib/pgsql/15
+[root@localhost 15]# ls -lrt
+total 4
+drwx------. 2 postgres postgres    6 10 nov.  02:29 backups
+-rw-------. 1 postgres postgres 1196 29 janv. 17:51 initdb.log
+\textbf{drwx------.} 2 postgres postgres    6 27 févr. 05:29 data
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Vérification du flux PostgreSQL entre le standby et le primaire}
+
+   \begin{itemize}
+      \item Vérification que le flux PostgreSQL est ouvert entre les serveurs hqpg-0x-repl et hqpg-0x
+      \item Depuis le serveur hqpg-0x-repl, lancer la commande suivante en précisant l'adresse IP du serveur hqpg-0x:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[linagora@localhost ~]$ psql 'host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2'
+psql (15.1, serveur 15.2)
+Saisissez « help » pour l'aide.
+
+repmgr=# 
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Déploiement de \textbf{repmgr.conf}}
+
+   \begin{itemize}
+      \item Sur le serveur primaire hqpg-0x, créer le fichier /var/lib/pgsql/15/\textbf{repmgr.conf} ci-dessous
+      \item Il est important de ne pas le créer dans le répertoire data car il risque d'être écrasé ou supprimé par les opérations de réplication
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+node_id=1
+node_name='node1'
+conninfo='host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2'
+data_directory='/var/lib/pgsql/15'
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://repmgr.org/docs/current/quickstart-repmgr-conf.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Partitionnement des données}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
