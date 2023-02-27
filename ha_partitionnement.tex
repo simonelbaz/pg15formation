@@ -537,6 +537,30 @@ WARNING: following issues were detected
 
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Test du failover avec \textbf{repmgrd}}
+
+   \begin{itemize}
+      \item Sur le serveur hqpg-0x-repl, lancer le process \textbf{repmgrd}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ /usr/pgsql-15/bin/repmgrd -f /etc/repmgr/15/repmgr.conf
+\end{Verbatim}
+\end{tiny}
+      \item Celui-ci se met en surveillance du noeud principal et détecte les cas d'indisponibilité
+      \item Arrêter le noeud primaire avec la commande ci-dessous lancée en tant que root:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+# systemctl stop postgresql-15.service
+\end{Verbatim}
+      \item Vérifier que le noeud réplicat devient noeud primaire
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
