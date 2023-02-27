@@ -234,7 +234,7 @@ data_directory='/var/lib/pgsql/15/data'
 \begin{frame}[fragile]{Exercice - Enregistrement du serveur primaire}
 
    \begin{itemize}
-      \item Pour renregistrer le serveur primaire, lancer la commande suivante:
+      \item Pour enregistrer le serveur primaire, lancer la commande suivante:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 # su - postgres
@@ -321,6 +321,223 @@ data_directory='/var/lib/pgsql/15/data'
 \end{toile}
 
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Clone du primaire vers le standby en mode dry-run}
+
+   \begin{itemize}
+      \item Sur le serveur standby, lancer la commande suivante avec le user postgres:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ /usr/pgsql-15/bin/repmgr -h 10.10.10.28 -U repmgr -d repmgr \
+-f /etc/repmgr/15/repmgr.conf standby clone --dry-run
+NOTICE: destination directory "/var/lib/pgsql/15/data" provided
+INFO: connecting to source node
+DETAIL: connection string is: host=10.10.10.28 user=repmgr dbname=repmgr
+DETAIL: current installation size is 51 MB
+INFO: "repmgr" extension is installed in database "repmgr"
+INFO: replication slot usage not requested;  no replication slot will be set up for this standby
+INFO: parameter "max_wal_senders" set to 10
+NOTICE: checking for available walsenders on the source node (2 required)
+INFO: sufficient walsenders available on the source node
+DETAIL: 2 required, 10 available
+NOTICE: checking replication connections can be made to the source server (2 required)
+INFO: required number of replication connections could be made to the source server
+DETAIL: 2 replication connections required
+WARNING: data checksums are not enabled and "wal_log_hints" is "off"
+DETAIL: pg_rewind requires "wal_log_hints" to be enabled
+NOTICE: standby will attach to upstream node 1
+HINT: consider using the -c/--fast-checkpoint option
+INFO: would execute:
+  pg_basebackup -l "repmgr base backup"  -D /var/lib/pgsql/15/data -h 10.10.10.28 -p 5432 -U repmgr -X stream 
+INFO: all prerequisites for "standby clone" are met
+\end{Verbatim}
+\end{tiny}
+      \item Activer \textbf{wal\_log\_hints} pour corriger le WARNING
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Clone du primaire vers le standby en mode production}
+
+   \begin{itemize}
+      \item Relancer la commande précédente sans l'option --dry-run si aucun erreur ou warning n'est indiqué
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ /usr/pgsql-15/bin/repmgr -h 10.10.10.28 -U repmgr -d repmgr \
+-f /etc/repmgr/15/repmgr.conf standby clone
+NOTICE: destination directory "/var/lib/pgsql/15/data" provided
+INFO: connecting to source node
+DETAIL: connection string is: host=10.10.10.28 user=repmgr dbname=repmgr
+DETAIL: current installation size is 51 MB
+INFO: replication slot usage not requested;  no replication slot will be set up for this standby                                                                                             
+NOTICE: checking for available walsenders on the source node (2 required)
+NOTICE: checking replication connections can be made to the source server (2 required)
+INFO: checking and correcting permissions on existing directory "/var/lib/pgsql/15/data"
+NOTICE: starting backup (using pg_basebackup)...
+HINT: this may take some time; consider using the -c/--fast-checkpoint option
+INFO: executing:
+  pg_basebackup -l "repmgr base backup"  -D /var/lib/pgsql/15/data -h 10.10.10.28 -p 5432 -U repmgr -X stream                                                                                
+NOTICE: standby clone (using pg_basebackup) complete
+NOTICE: you can now start your PostgreSQL server
+HINT: for example: pg_ctl -D /var/lib/pgsql/15/data start
+HINT: after starting the server, you need to register this standby with "repmgr standby register"
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Démarrage du serveur standby}
+
+   \begin{itemize}
+      \item Démarrer le serveur standby avec la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ /usr/pgsql-15/bin/pg_ctl -D /var/lib/pgsql/15/data start
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Vérification de la réplication depuis le noeud primaire}
+
+   \begin{itemize}
+      \item Sur le serveur primaire hqpg-0x, lancer la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+postgres=# SELECT * FROM pg_stat_replication;
+-[ RECORD 1 ]----+------------------------------
+pid              | 88219
+usesysid         | 43973
+usename          | repmgr
+application_name | node2
+client_addr      | 10.10.10.29
+client_hostname  | 
+client_port      | 34828
+backend_start    | 2023-02-27 07:52:15.110657-05
+backend_xmin     | 
+state            | streaming
+sent_lsn         | 0/3117D458
+write_lsn        | 0/3117D458
+flush_lsn        | 0/3117D458
+replay_lsn       | 0/310001C8
+write_lag        | 00:00:00.038475
+flush_lag        | 00:00:00.113213
+replay_lag       | 00:05:19.386491
+sync_priority    | 0
+sync_state       | async
+reply_time       | 2023-02-27 07:57:34.59643-05
+
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Vérification de la réplication depuis le noeud standby}
+
+   \begin{itemize}
+      \item Sur le serveur standby hqpg-0x-repl, lancer la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+postgres=# SELECT * FROM pg_stat_wal_receiver;
+-[ RECORD 1 ]---------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                           
+pid                   | 42326
+status                | streaming
+receive_start_lsn     | 0/31000000
+receive_start_tli     | 2
+written_lsn           | 0/3117D578
+flushed_lsn           | 0/3117D578
+received_tli          | 2
+last_msg_send_time    | 2023-02-27 08:01:37.164908-05
+last_msg_receipt_time | 2023-02-27 08:01:37.165114-05
+latest_end_lsn        | 0/3117D578
+latest_end_time       | 2023-02-27 07:59:06.918943-05
+slot_name             |
+sender_host           | 10.10.10.28
+sender_port           | 5432
+conninfo              | user=repmgr passfile=/var/lib/pgsql/.pgpass channel_binding=prefer connect_timeout=2 dbname=replication host=10.10.10.28 port=5432 application_name=node2 fallback_application_name=walreceiver sslmode=prefer sslcompression=0 sslsni=1 ssl_min_protocol_version=TLSv1.2 gssencmode=prefer krbsrvname=postgres target_session_attrs=any                           
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Enregistrement du noeud standby}
+
+   \begin{itemize}
+      \item Sur le serveur standby hqpg-0x-repl, lancer la commande suivante avec le user postgres:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ /usr/pgsql-15/bin/repmgr -f /etc/repmgr/15/repmgr.conf standby register
+INFO: connecting to local node "node2" (ID: 2)
+INFO: connecting to primary database
+WARNING: --upstream-node-id not supplied, assuming upstream node is primary (node ID: 1)
+INFO: standby registration complete
+NOTICE: standby node "node2" (ID: 2) successfully registered
+\end{Verbatim}
+\end{tiny}
+      \item Sur le serveur primaire hqpg-0x, vérifier l'état du cluster avec la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[postgres@localhost pg_wal]$ /usr/pgsql-15/bin/repmgr -f /etc/repmgr/15/repmgr.conf cluster show
+ ID | Name  | Role    | Status    | Upstream | Location | Priority | Timeline | Connection string                                           
+----+-------+---------+-----------+----------+----------+----------+----------+--------------------------------------------------------------
+ 1  | node1 | primary | * running |          | default  | 100      | 2        | host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2
+ 2  | node2 | standby |   running | ? node1  | default  | 100      | 2        | host=10.10.10.29 user=repmgr dbname=repmgr connect_timeout=2
+
+WARNING: following issues were detected
+  - WAL replay is paused on node "node2" (ID: 2) with WAL replay pending; this node cannot be manually promoted until WAL replay is resumed
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Réactivation du rejeu des WALs}
+
+   \begin{itemize}
+      \item Réactivation du rejeu des WALs
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+repmgr=# select pg_wal_replay_resume()
+;
+ pg_wal_replay_resume
+----------------------
+
+(1 ligne)
+
+
+[postgres@localhost pg_wal]$ /usr/pgsql-15/bin/repmgr -f /etc/repmgr/15/repmgr.conf cluster show                                                                                             
+ ID | Name  | Role    | Status               | Upstream | Location | Priority | Timeline | Connection string                                                                                 
+----+-------+---------+----------------------+----------+----------+----------+----------+--------------------------------------------------------------                                     
+ 1  | node1 | primary | * running            |          | default  | 100      | 2        | host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2                                      
+ 2  | node2 | standby | ! running as primary | ? node1  | default  | 100      | 3        | host=10.10.10.29 user=repmgr dbname=repmgr connect_timeout=2                                      
+
+WARNING: following issues were detected
+  - node "node2" (ID: 2) is registered as standby but running as primary
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
