@@ -172,11 +172,28 @@ hostnogssenc  database  user  IP-address  IP-mask      auth-method  [auth-option
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Le champ \textbf{auth-meth}}
+
+   Les principals valeurs sont:
+   \begin{itemize}
+      \item trust: accepte inconditionnellement
+      \item reject: rejette inconditionnellement
+      \item peer: l'utilisateur du client (utilisateur système) correspond au nom de la base. Valide seulement pour le type local
+      \item ident: l'utilisateur du client (utilisateur système) correspond au nom de la base. Valide seulement pour le type TCP (host)
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{La vue \textbf{pg\_hba\_file\_rules}}
 
    \begin{itemize}
       \item Cette vue est utile car elle permet de tester des changements de pg\_hba.conf
+      \item Elle est accessible uniquement par les super-utilisateurs
       \item Elle permet également de diagnostiquer les erreurs de syntaxe
+      \item Elle reflète ce qui est actuellement dans pg\_hba.conf et non ce qui a été chargé par le serveur
+      \item En cas d'erreur de syntaxe, la colonne \textbf{error} est renseignée
    \end{itemize}
    
 \begin{toile}
@@ -200,6 +217,23 @@ hostnogssenc  database  user  IP-address  IP-mask      auth-method  [auth-option
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/user-manag.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{La variable \textbf{search\_path}}
+
+   \begin{itemize}
+      \item Cette variable spécifie l'ordre des schémas dans lesquels un objet est recherché lorsque celui-ci n'est pas préfixé par un nom de schéma
+      \item Lorsque des objets ont le même nom dans 2 schémas différents, la priorité est donné à celui qui est trouvé le premier à partir du \textbf{search\_path}
+      \item Un objet qui ne figure pas dans les schémas mentionnés par cette variable doit être précédé du nom du schéma
+      \item Si l'un des schémas a pour valeur \$user, il est remplacé par le nom de l'utilisateur courant (\textbf{CURRENT\_USER})
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-client.html\#GUC-SEARCH-PATH}
 \end{toile}
 
 \end{frame}
