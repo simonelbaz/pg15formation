@@ -230,6 +230,7 @@ hostnogssenc  database  user  IP-address  IP-mask      auth-method  [auth-option
       \item Lorsque des objets ont le même nom dans 2 schémas différents, la priorité est donné à celui qui est trouvé le premier à partir du \textbf{search\_path}
       \item Un objet qui ne figure pas dans les schémas mentionnés par cette variable doit être précédé du nom du schéma
       \item Si l'un des schémas a pour valeur \$user, il est remplacé par le nom de l'utilisateur courant (\textbf{CURRENT\_USER})
+      \item Pour accéder à un schéma, l'utilisateur doit avoir la permission \textbf{USAGE}
    \end{itemize}
 
 \begin{toile}
