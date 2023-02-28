@@ -136,6 +136,7 @@ include 'postgresql.replication.conf'
 
 \begin{toile}
 \toileurl{https://repmgr.org/docs/current/quickstart-postgresql-configuration.html}
+\toileurl{https://www.postgresql.org/docs/15/hot-standby.html}
 \end{toile}
 
 \end{frame}
@@ -596,8 +597,13 @@ $ /usr/pgsql-15/bin/repmgrd -f /etc/repmgr/15/repmgr.conf
 
    \begin{itemize}
       \item Le lien suivant décrit comment le nouveau réplicat (ancien primaire) rattrape le nouveau primaire
+      \item https://repmgr.org/docs/current/repmgr-node-rejoin.html\#REPMGR-NODE-REJOIN-PG-REWIND
       \item https://repmgr.org/docs/current/follow-new-primary.html
    \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/app-pgrewind.html}
+\end{toile}
 
 \end{frame}
 
