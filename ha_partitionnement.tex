@@ -104,9 +104,39 @@ repmgr_15-llvmjit.x86_64                                          5.3.3-1.rhel8 
 # dnf install rsync
 \end{Verbatim}
 \end{tiny}
-      \item Paramétrer le noeud primaire en suivant le lien: https://repmgr.org/docs/current/quickstart-postgresql-configuration.html
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Paramétrage du noeud primaire}
+
+   \begin{itemize}
+      \item Sur le serveur hqpg-0x, créer le fichier \textbf{postgresql.replication.conf} avec les lignes suivantes:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+max_wal_senders = 10
+max_replication_slots = 10
+wal_level = 'replica'
+hot_standby = on
+archive_mode = on
+archive_command = '/bin/true'
+\end{Verbatim}
+\end{tiny}
+      \item Ajouter la ligne suivante en fin de postgresql.conf:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+include 'postgresql.replication.conf'
+\end{Verbatim}
+\end{tiny}
       \item \textbf{Remarques}: Certaines valeurs de paramètres ont changé entre les différentes versions de PostgreSQL 9.6+
    \end{itemize}
+
+
+\begin{toile}
+\toileurl{https://repmgr.org/docs/current/quickstart-postgresql-configuration.html}
+\end{toile}
 
 \end{frame}
 
