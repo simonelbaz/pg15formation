@@ -7,7 +7,56 @@
 \begin{frame}[fragile]{Chiffrement dans PostgreSQL}
 
    \begin{itemize}
-      \item WIP
+      \item Il existe différents niveaux de chiffrement dans PostgreSQL
+      \begin{itemize}
+         \item Chiffrement du mot de passe. Paramètre \textbf{password\_encryption}
+         \item Chiffrement de colonnes spécifiques. Le module pgcrypto permet de chiffrer/déchiffrer des colonnes.
+         \begin{itemize}
+            \item Le client fournit la clé de déchiffrement au serveur qui lui renvoie la donnée en clair
+            \item La donnée en clair et la clef de déchiffrement résident temporairement sur le serveur
+            \item Cet instant court d'exposition de la donnée et de la clef permettraient à un administrateur d'intercepter ces données
+         \end{itemize}
+      \end{itemize}
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/encryption-options.html}
+\toileurl{https://www.postgresql.org/docs/15/pgcrypto.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Chiffrement dans PostgreSQL}
+
+   \begin{itemize}
+         \item Chiffrement de partitions disque. Le chiffrement peut être réalisé au niveau du filesystem ou au niveau des blocs de données
+         \begin{itemize}
+            \item Les modules eCryptfs ou EncFS sur Linux permettent de chiffrer un filesystem
+            \item Le chiffrement au niveau du bloc ou du disque est réalisé par \textbf{dm-crypt} + \textbf{LUKS}
+            \item Ces mécanismes protègent de la lecture de données non chiffrées ou en cas de vol de disque
+            \item Lorsque le disque est monté pour lecture en clair, il devient possible pour un attaquant d'accéder aux données
+            \item Le montage du disque est toutefois protégé par une clef
+         \end{itemize}
+         \item Chiffrement des flux réseau. Les connexions SSL chiffrent les requêtes, les mots de passe et les données échangés entre le serveur et le client
+         \begin{itemize}
+            \item Le fichier \textbf{pg\_hba.conf} spécifie les hôtes qui discutent en clair (\textit{host}) et ceux qui discutent en chiffré (\textit{hostssl})
+            \item Il est également possible d'établir des tunnels SSH pour discuter avec le serveur
+         \end{itemize}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Authentification par certificats}
+
+   \begin{itemize}
+         \item Il est possible de déployer des certificats SSL au niveau serveur et client
+         \item Cela nécessite du paramétrage mais fournit une identification mutuelle plus forte que le mot de passe
+         \item Cela permet de certifier que le serveur est bien la machine accédée et empêche donc la récupération de mot de passe
+         \item L'authentification par certificat prévient également les attaques de type \textit{man in the middle}
    \end{itemize}
 
 \begin{toile}
@@ -18,28 +67,170 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Authentification}
+\begin{frame}[fragile]{Authentification client - \textbf{pg\_hba.conf}}
 
    \begin{itemize}
-      \item WIP
+      \item PostgreSQL propose plusieurs méthodes d'authentification basées sur l'adresse IP du client, le nom de la base et l'utilisateur
+      \item HBA signifie \textit{Host Base Authentication}
+      \item pg\_hba.conf est déployé par la phase initdb
+      \item Il est possible de paramétrer sa localisation avec le paramètre \text{hba\_file}
+      \item Le fichier est composé de plusieurs enregistrements
+      \item Chaque enregistrement est un ensemble de champs séparés par un espace ou une tabulation
+      \item Chaque champ peut inclure un espace s'il est entouré de double-quotes
+      \item Chaque champ encadré par une quote perd sa signification spéciale
+      \item Le caractère \textbackslash en fin de ligne prolonge la ligne à la ligne suivante
    \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/client-authentication.html}
+\toileurl{https://www.postgresql.org/docs/15/auth-pg-hba-conf.html}
 \end{toile}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Politiques de sécurité des lignes - Row Security Policies}
+\begin{frame}[fragile]{Format de \textbf{pg\_hba.conf}}
 
    \begin{itemize}
-      \item WIP
+      \item Voici le format possible des enregistrements de pg\_hba.conf:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+local         database  user  auth-method [auth-options]
+host          database  user  address     auth-method  [auth-options]
+hostssl       database  user  address     auth-method  [auth-options]
+hostnossl     database  user  address     auth-method  [auth-options]
+hostgssenc    database  user  address     auth-method  [auth-options]
+hostnogssenc  database  user  address     auth-method  [auth-options]
+host          database  user  IP-address  IP-mask      auth-method  [auth-options]
+hostssl       database  user  IP-address  IP-mask      auth-method  [auth-options]
+hostnossl     database  user  IP-address  IP-mask      auth-method  [auth-options]
+hostgssenc    database  user  IP-address  IP-mask      auth-method  [auth-options]
+hostnogssenc  database  user  IP-address  IP-mask      auth-method  [auth-options]
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Types de connexion}
+
+   \begin{itemize}
+      \item local: Utilisation des sockets Unix pour accéder à la base de données
+      \item host: Utilisation du protocole TCP pour des accès en clair ou SSL
+      \item hostssl: Utilisation obligatoire de SSL pour le client
+      \item hostnossl: SSL désactivé
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Le champ bases de données}
+
+   \begin{itemize}
+      \item all: signifie toutes les bases de données
+      \item sameuser: l'enregistrement correspond si la base de données a le même nom que l'utilisateur
+      \item samerole: l'enregistrement correspond si l'utilisateur a le même rôle que le nom de la base
+      \item replication: l'enregistrement correspond si une connexion pour une réplication physique est initialisée
+      \item \textbf{Remarque}: Cela n'inclut pas les réplications logiques
+      \item Un ou plusieurs noms de base séparés par une virgule peuvent être précisés
+      \item Le nom d'un fichier précédé de '@' peut être précisé
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Le champ utilisateur}
+
+   \begin{itemize}
+      \item all: signifie tous les utilisateurs
+      \item Cela peut être le nom d'un utilisateur ou d'un rôle
+      \item Si le champ est précédé d'un caractère '+', cela signifie tous les rôles faisant partie de ce rôle
+      \item Un ou plusieurs noms d'utilisateurs séparés par une virgule peuvent être précisés
+      \item Le nom d'un fichier précédé de '@' peut être précisé
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Le champ \textbf{address}}
+
+   \begin{itemize}
+      \item all: signifie tous les hôtes
+      \item samehost: toutes les adresses IP du serveur
+      \item samenet: même sous-réseau
+      \item un nom de machine (résolution DNS et résolution inverse sont appliquées))
+      \item si le nom est précédé d'un '.', tous les serveurs du domaine correspondent
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{La vue \textbf{pg\_hba\_file\_rules}}
+
+   \begin{itemize}
+      \item Cette vue est utile car elle permet de tester des changements de pg\_hba.conf
+      \item Elle permet également de diagnostiquer les erreurs de syntaxe
+   \end{itemize}
+   
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/view-pg-hba-file-rules.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Les rôles}
+
+   \begin{itemize}
+      \item Un rôle peut être soit un utilisateur de la base soit un groupe d'utilisateurs soit les deux
+      \item Cela dépend comment il a été créé
+      \item Les rôles peuvent posséder des objets (table, fonction, \ldots)
+      \item Ils peuvent assigner des droits sur ces objets à d'autres rôles
+      \item Un rôle peut appartenir à un autre rôle
+      \item Le catalogue système \textbf{pg\_roles} liste les rôles
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/user-manag.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Politiques de sécurité des lignes - Row Security Policies (RSP)}
+
+   \begin{itemize}
+      \item En plus de l'accès aux tables fourni par la commande \textbf{GRANT}, il est possible de préciser également les droits d'accès aux lignes d'une table
+      \item Elle est activée par la clause \textbf{ENABLE ROW LEVEL SECURITY} de la commande \textbf{ALTER TABLE}
+      \item A ce moment, la sélection ou la modification sont autorisés par une RSP
    \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/current/ddl-rowsecurity.html}
+\toileurl{https://www.postgresql.org/docs/current/sql-grant.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Déploiement du chiffrement SSL entre le client et le serveur}
+
+   \begin{itemize}
+      \item Créer et déployer les certificats pour mettre en place un flux chiffré
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/ssl-tcp.html}
 \end{toile}
 
 \end{frame}

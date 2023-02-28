@@ -143,6 +143,21 @@ include 'postgresql.replication.conf'
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Précision sur le \textbf{postgresql.conf}}
+
+   \begin{itemize}
+      \item Comme indiqué dans le lien ci-dessous, si le même paramètre apparaît plusieurs fois
+      \item La \textbf{dernière} occurrence est utilisée et toutes les précédentes sont ignorées
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/current/config-setting.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Exercice - Création de la base de données \textbf{repmgr}}
 
    \begin{itemize}
@@ -585,8 +600,8 @@ $ /usr/pgsql-15/bin/repmgrd -f /etc/repmgr/15/repmgr.conf
 \begin{Verbatim}[commandchars=\&\{\}]
 # systemctl stop postgresql-15.service
 \end{Verbatim}
-      \item Vérifier que le noeud réplicat devient noeud primaire
 \end{tiny}
+      \item Vérifier que le noeud réplicat devient noeud primaire
    \end{itemize}
 
 \end{frame}
