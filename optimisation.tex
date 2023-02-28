@@ -6,7 +6,6 @@
 
 \begin{frame}[fragile]{Les indexes dans PostgreSQL}
 
-
    \begin{itemize}
       \item B-Tree Index - très utile pour la recherche d'une valeur ou le scan d'une plage de valeur. Utilisé également pour les expressions régulières (pattern matching)
       \item Hash Index - très efficace pour recherche de valeurs égales
@@ -112,14 +111,61 @@ Hugepagesize:    2048 kB
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[fragile]{Index only scans}
-   \label(indexonlyscan)
+   \label{indexonlyscan}
 
-   TODO
-   WIP
+   \begin{itemize}
+      \item Les index dans PostgreSQL sont dits secondaires car l'index et la donnée indexée sont stockés à 2 endroits différents
+      \item Les données de la table sont stockées dans une zone appelée \textbf{heap}
+      \item Cela signifie que lors d'un scan d'un index ordinaire, la récupération d'une ligne passe par la récupération d'information dans l'index puis dans la heap
+      \item De plus, les données d'un index correspondant à une clause WHERE sont proches dans l'index. Les données qui leur correspondent peuvent être éparpillées dans la heap
+      \item Le scan d'un index peut donc causer des accès random nombreux, qui peuvent se révéler lents dans le cas de certains médias à rotation.
+      \item Pour résoudre ce problème de performances, PostgreSQL supporte les index-only scans. 
+      \item Les index only scans renvoient les données indexées depuis l'index sans accéder à la heap.
+   \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/indexes-index-only-scans.html}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Index only scans}
+
+   \begin{itemize}
+      \item L'idée est de stocker la donnée indexée avec l'entrée dans l'index
+      \item Il y a 2 restrictions à l'application de cet algorithme:
+      \begin{itemize}
+         \item Le type de l'index doit supporter les index only scans. Les index B-Tree supportent cet algorithme. GiST et SP-GisT le supportent pour certains opérateurs de classe mais pas pour d'autres.
+         \item Les autres types d'index ne supportent pas les index only scans.
+         \item La requête ne doit référencer que les colonnes de l'index
+      \end{itemize}
+      \item Exemple d'une table ayant les colonnes x, y et z.
+      \item Les requêtes pouvant faire l'usage des index only scans sont:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+SELECT x, y FROM tab WHERE x = 'key';
+SELECT x FROM tab WHERE x = 'key' AND y < 42;
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Restrictions sur les index only scans}
+
+   \begin{itemize}
+      \item Les requêtes suivantes ne peuvent pas faire l'usage des index only scans:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+SELECT x, z FROM tab WHERE x = 'key';
+SELECT x FROM tab WHERE x = 'key' AND z < 42;
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
 
 \end{frame}
 
