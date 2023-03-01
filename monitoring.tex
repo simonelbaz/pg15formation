@@ -6,8 +6,15 @@
 
 \begin{frame}[fragile]{Supervision de la base de données}
 
-   TODO
-   WIP
+   \begin{itemize}
+      \item En premier lieu, les outils Unix suivants sont très utiles:
+      \begin{itemize}
+         \item ps: liste les process Unix, leur état, leur stockage en mémoire
+         \item top: classe les process en fonction de différents critères et donne une idée de la charge du serveur
+         \item iostat: liste les statistiques des I/O du serveur
+         \item vmstat: remote des statistiques sur la mémoire virtuelle du serveur
+      \end{itemize}
+   \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/15/monitoring.html}
@@ -17,34 +24,45 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Tests de vérification de la bonne santé de la base}
+\begin{frame}[fragile]{Le système de statistiques cumulatif}
 
-   TODO
-   WIP
+   \begin{itemize}
+      \item WIP
+   \end{itemize}
 
 \begin{toile}
-\toileurl{https://bucardo.org/check\_postgres/}
+\toileurl{}
 \end{toile}
 
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}{Supervision de l'activité des disques}
-
-\begin{itemize}
-
-   \item TODO
-
-\end{itemize}
-
-\begin{toile}
-\toileurl{https://www.postgresql.org/docs/15/diskusage.html}
-\end{toile}
-
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-% TODO Knowledge of basic features of systemd and Upstart.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}[fragile]{Tests de vérification de la bonne santé de la base}
+%
+%   TODO
+%   WIP
+%
+%\begin{toile}
+%\toileurl{https://bucardo.org/check\_postgres/}
+%\end{toile}
+%
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{frame}{Supervision de l'activité des disques}
+%
+%\begin{itemize}
+%
+%   \item TODO
+%
+%\end{itemize}
+%
+%\begin{toile}
+%\toileurl{https://www.postgresql.org/docs/15/diskusage.html}
+%\end{toile}
+%
+%\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
