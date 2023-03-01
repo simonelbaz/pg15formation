@@ -230,39 +230,44 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\begin{frame}{Déploiement et utilisation du module \textbf{pg\_visibility}}
-%
-%\begin{itemize}
-%   \item Modification de la variable dans postgresql.conf:
-%\begin{tiny}
-%\begin{Verbatim}[commandchars=\&\{\}]
-%shared_preload_libraries = 'pg_visibility'
-%\end{Verbatim}
-%\end{tiny}
-%   \item Redémarrage du serveur PostgreSQL
-%\begin{tiny}
-%\begin{Verbatim}[commandchars=\&\{\}]
-%[postgres@localhost data]$ psql hqdb
-%hqdb=# CREATE EXTENSION pg_visibility;
-%CREATE EXTENSION
-%hqdb=# \d
-%            Liste des relations
-% Schéma |    Nom     | Type  | Propriétaire
-%--------+------------+-------+--------------
-% public | test_pitr1 | table | postgres
-%...
-%hqdb=# insert into test_pitr1 values ('test pgv');
-%INSERT 0 1                                           
-%hqdb=# select pg_visibility('test_pitr1'::regclass);
-% pg_visibility                                                 
-%---------------                     
-% (0,f,f,f)                                      
-%(1 ligne)     
-%\end{Verbatim}
-%\end{tiny}
-%\end{itemize}
-%
-%\end{frame}
+\begin{frame}[fragile]{Déploiement et utilisation du module \textbf{pg\_visibility}}
+
+\begin{itemize}
+   \item Modification de la variable dans postgresql.conf:
+\end{itemize}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+   shared\_preload\_libraries = 'pg\_visibility'
+\end{Verbatim}
+\end{tiny}
+
+\begin{itemize}
+   \item Redémarrage du serveur PostgreSQL
+\end{itemize}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ psql hqdb
+hqdb=# CREATE EXTENSION pg\_visibility;
+CREATE EXTENSION
+hqdb=# \d
+            Liste des relations
+ Schéma |    Nom     | Type  | Propriétaire
+--------+------------+-------+--------------
+ public | test\_pitr1 | table | postgres
+...
+hqdb=# insert into test\_pitr1 values ('test pgv');
+INSERT 0 1                                           
+hqdb=# select pg\_visibility('test\_pitr1'::regclass);
+ pg\_visibility                                                 
+---------------                     
+ (0,f,f,f)                                      
+(1 ligne)     
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
