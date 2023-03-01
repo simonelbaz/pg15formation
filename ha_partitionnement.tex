@@ -265,6 +265,11 @@ node_id=1
 node_name='node1'
 conninfo='host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2'
 data_directory='/var/lib/pgsql/15/data'
+pg_bindir='/usr/pgsql-15/bin/'
+
+failover=automatic
+promote_command='/usr/pgsql-15/bin/repmgr standby promote -f /etc/repmgr/15/repmgr.conf --log-to-file'
+follow_command='/usr/pgsql-15/bin/repmgr standby follow -f /etc/repmgr/15/repmgr.conf --log-to-file --upstream-node-id=%n'
 \end{Verbatim}
 \end{tiny}
    \end{itemize}
@@ -358,6 +363,11 @@ node_id=2
 node_name='node2'
 conninfo='host=10.10.10.29 user=repmgr dbname=repmgr connect_timeout=2'
 data_directory='/var/lib/pgsql/15/data'
+pg_bindir='/usr/pgsql-15/bin/'
+
+failover=automatic
+promote_command='/usr/pgsql-15/bin/repmgr standby promote -f /etc/repmgr/15/repmgr.conf --log-to-file'
+follow_command='/usr/pgsql-15/bin/repmgr standby follow -f /etc/repmgr/15/repmgr.conf --log-to-file --upstream-node-id=%n'
 \end{Verbatim}
 \end{tiny}
    \end{itemize}
@@ -585,6 +595,43 @@ WARNING: following issues were detected
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Exercice - Les différents types de failover gérés par \textbf{repmgrd}}
+
+   \begin{itemize}
+      \item repmgrd gère 2 types de failover:
+      \begin{itemize}
+         \item manual: repmgrd détecte la panne du noeud primaire mais il n'entreprend aucune action. C'est au DBA de réaliser l'opération de \textbf{promote} et de demander aux autres noeuds standby de suivre le nouveau primaire
+         \item automatique: repmgrd détecte la panne du noeud primaire puis il déclenche l'opération de \textbf{promote}.
+         \item Il est possible de paramétrer repgmrd pour demander aux autres noeuds standby de suivre le nouveau primaire en cas de failover
+      \end{itemize}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Installation de \textbf{repmgrd}}
+
+   \begin{itemize}
+      \item Pour utiliser repmgrd, il est important d'ajouter la librairie repmgr dans la variable \textbf{shared\_preload\_libraries} de postgresql.conf:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+         shared_preload_libraries = 'repmgr'
+\end{Verbatim}
+\end{tiny}
+      \item repmgrd est un process qui est déployé sur les noeuds standby
+      \item Il va surveiller le noeud primaire et amorcer le failover en cas de panne du noeud primaire
+      \item Une fois le nouveau noeud primaire démarré, il peut demander aux autres noeuds standby de \textit{suivre} le nouveau noeud primaire
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://repmgr.org/docs/current/repmgrd-basic-configuration.html\#REPMGRD-AUTOMATIC-FAILOVER-CONFIGURATION}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Exercice - Test du failover avec \textbf{repmgrd}}
 
    \begin{itemize}
@@ -601,7 +648,41 @@ $ /usr/pgsql-15/bin/repmgrd -f /etc/repmgr/15/repmgr.conf
 # systemctl stop postgresql-15.service
 \end{Verbatim}
 \end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Test du failover avec \textbf{repmgrd}}
+
+   \begin{itemize}
       \item Vérifier que le noeud réplicat devient noeud primaire
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[2023-02-28 19:11:33] [DETAIL] PQping() returned "PQPING_NO_RESPONSE"
+[2023-02-28 19:11:33] [WARNING] unable to reconnect to node "node1" (ID: 1) after 6 attempts
+[2023-02-28 19:11:33] [INFO] 0 active sibling nodes registered
+[2023-02-28 19:11:33] [INFO] 2 total nodes registered
+[2023-02-28 19:11:33] [INFO] primary node  "node1" (ID: 1) and this node have the same location ("default")
+[2023-02-28 19:11:33] [INFO] no other sibling nodes - we win by default
+[2023-02-28 19:11:33] [NOTICE] this node is the only available candidate and will now promote itself
+[2023-02-28 19:11:33] [INFO] promote_command is:
+  "/usr/pgsql-15/bin/repmgr standby promote -f /etc/repmgr/15/repmgr.conf --log-to-file"
+[2023-02-28 19:11:33] [NOTICE] promoting standby to primary
+[2023-02-28 19:11:33] [DETAIL] promoting server "node2" (ID: 2) using pg_promote()
+[2023-02-28 19:11:33] [NOTICE] waiting up to 60 seconds (parameter "promote_check_timeout") for promotion to complete
+[2023-02-28 19:11:34] [NOTICE] STANDBY PROMOTE successful
+[2023-02-28 19:11:34] [DETAIL] server "node2" (ID: 2) was successfully promoted to primary
+[2023-02-28 19:11:34] [INFO] checking state of node 2, 1 of 6 attempts
+[2023-02-28 19:11:34] [NOTICE] node 2 has recovered, reconnecting
+[2023-02-28 19:11:34] [INFO] connection to node 2 succeeded
+[2023-02-28 19:11:34] [INFO] original connection is still available
+[2023-02-28 19:11:34] [INFO] 0 followers to notify
+[2023-02-28 19:11:34] [INFO] switching to primary monitoring mode
+[2023-02-28 19:11:34] [NOTICE] monitoring cluster primary "node2" (ID: 2)
+\end{Verbatim}
+\end{tiny}
    \end{itemize}
 
 \end{frame}
@@ -611,14 +692,103 @@ $ /usr/pgsql-15/bin/repmgrd -f /etc/repmgr/15/repmgr.conf
 \begin{frame}[fragile]{Exercice - Rattrapage de l'ancien primaire vers le nouveau primaire}
 
    \begin{itemize}
-      \item Le lien suivant décrit comment le nouveau réplicat (ancien primaire) rattrape le nouveau primaire
-      \item https://repmgr.org/docs/current/repmgr-node-rejoin.html\#REPMGR-NODE-REJOIN-PG-REWIND
-      \item https://repmgr.org/docs/current/follow-new-primary.html
+      \item Une fois le noeud 1 remis en service, il est important de rétablir la réplication et de le déclarer en noeud standby pour rétablir le cluster
+      \item Pour cela, l'option \textbf{node rejoin} va être utilisée
+      \item Elle s'appuie sur la commande \textbf{pg\_rewind} de PostgreSQL
+      \item Dans un $1^{er}$ temps, il est préférable de la tester en mode \textit{dry-run}
    \end{itemize}
 
 \begin{toile}
 \toileurl{https://www.postgresql.org/docs/current/app-pgrewind.html}
+\toileurl{https://repmgr.org/docs/current/repmgr-node-rejoin.html\#REPMGR-NODE-REJOIN-PG-REWIND}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Lancement du \textit{node rejoin} en mode dry-run}
+
+   \begin{itemize}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr node rejoin -f /etc/repmgr/15/repmgr.conf -d 'host=10.10.10.45 dbname=repmgr user=repmgr' --force-rewind --config-files=postgresql.local.conf
+,postgresql.conf --verbose --dry-run                                                                                                                                                          
+NOTICE: using provided configuration file "/etc/repmgr/15/repmgr.conf"                                                                                                                        
+NOTICE: rejoin target is node "node2" (ID: 2)                                                                                                                                                 
+INFO: replication connection to the rejoin target node was successful                                                                                                                         
+INFO: local and rejoin target system identifiers match                                                                                                                                        
+DETAIL: system identifier is 7205351636391851618                                                                                                                                              
+INFO: prerequisites for using pg_rewind are met                                                                                                                                               
+INFO: temporary archive directory "/tmp/repmgr-config-archive-node1" created                                                                                                                  
+WARNING: specified file "/var/lib/pgsql/15/data/postgresql.local.conf" not found, skipping                                                                                                    
+INFO: file "postgresql.conf" would be copied to "/tmp/repmgr-config-archive-node1/postgresql.conf"                                                                                            
+INFO: 1 files would have been copied to "/tmp/repmgr-config-archive-node1"                                                                                                                    
+INFO: temporary archive directory "/tmp/repmgr-config-archive-node1" deleted                                                                                                                  
+INFO: pg_rewind would now be executed                                                                                                                                                         
+DETAIL: pg_rewind command is:                                                                                                                                                                 
+  pg_rewind -D '/var/lib/pgsql/15/data' --source-server='host=10.10.10.45 user=repmgr dbname=repmgr connect_timeout=2'                                                                        
+INFO: prerequisites for executing NODE REJOIN are met
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Lancement du \textit{node rejoin} en mode production}
+
+   \begin{itemize}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr node rejoin -f /etc/repmgr/15/repmgr.conf -d 'host=10.10.10.45 dbname=repmgr user=repmgr' --force-rewind=/usr/pgsql-15/bin/pg_rewind --config
+-files=postgresql.local.conf,postgresql.conf --verbose                                         
+NOTICE: using provided configuration file "/etc/repmgr/15/repmgr.conf"                         
+NOTICE: rejoin target is node "node2" (ID: 2)                                                  
+INFO: prerequisites for using pg_rewind are met                                                
+WARNING: specified file "/var/lib/pgsql/15/data/postgresql.local.conf" not found, skipping
+INFO: 1 files copied to "/tmp/repmgr-config-archive-node1"                                     
+NOTICE: executing pg_rewind                    
+DETAIL: pg_rewind command is "/usr/pgsql-15/bin/pg_rewind -D '/var/lib/pgsql/15/data' --source-server='host=10.10.10.45 user=repmgr dbname=repmgr connect_timeout=2'"
+NOTICE: 1 files copied to /var/lib/pgsql/15/data                                               
+INFO: directory "/tmp/repmgr-config-archive-node1" deleted                                     
+NOTICE: setting node 1's upstream to node 2    
+WARNING: unable to ping "host=10.10.10.25 user=repmgr dbname=repmgr connect_timeout=2"         
+DETAIL: PQping() returned "PQPING_NO_RESPONSE"                                                 
+NOTICE: starting server using "pg_ctl  -w -D '/var/lib/pgsql/15/data' start"                   
+INFO: node "node1" (ID: 1) is pingable         
+INFO: node "node1" (ID: 1) has attached to its upstream node                                   
+NOTICE: NODE REJOIN successful                 
+DETAIL: node 1 is now attached to node 2
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Exercice - Vérification de l'état du cluster}
+
+   \begin{itemize}
+      \item Les logs de repmgrd côté nouveau noeud primaire indiquent:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[2023-02-28 19:18:55] [NOTICE] new standby "node1" (ID: 1) has connected
+\end{Verbatim}
+\end{tiny}
+      \item L'état du cluster est maintenant:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr -f /etc/repmgr/15/repmgr.conf cluster show
+ ID | Name  | Role    | Status    | Upstream | Location | Priority | Timeline | Connection string                                           
+----+-------+---------+-----------+----------+----------+----------+----------+--------------------------------------------------------------
+ 1  | node1 | standby |   running | node2    | default  | 100      | 1        | host=10.10.10.25 user=repmgr dbname=repmgr connect_timeout=2
+ 2  | node2 | primary | * running |          | default  | 100      | 2        | host=10.10.10.45 user=repmgr dbname=repmgr connect_timeout=2
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
 
 \end{frame}
 

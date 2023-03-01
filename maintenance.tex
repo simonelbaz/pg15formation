@@ -516,7 +516,8 @@ HINT:  Stop the postmaster and vacuum that database in single-user mode.
       \item le launcher démarre un work tous les \textbf{autovacuum\_naptime} secondes pour chaque base de données
    \end{itemize}
    \item un work sera donc lancé tous les \text{autovacuum\_naptime}/N secondes s'il y a N bases de données
-   \item La limite est de \textbf{autovacuum\_max\_workers} worker par base de données
+   %\item La limite est de \textbf{autovacuum\_max\_workers} worker par base de données
+   \item La limite est de \textbf{autovacuum\_max\_workers} worker par serveur (à verifier)
 
 \end{itemize}
 
@@ -823,3 +824,28 @@ Il existe différents types de sauvegarde:
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Requête de selection du XID de la base}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+hqdb=# select pg_current_xact_id () ;
+ pg_current_xact_id 
+--------------------
+              14068
+(1 ligne)
+
+hqdb=# select pg_current_xact_id () ;
+ pg_current_xact_id 
+--------------------
+              14069
+(1 ligne)
+\end{Verbatim}
+\end{tiny}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/functions-info.html}
+\end{toile}
+
+\end{frame}
+
