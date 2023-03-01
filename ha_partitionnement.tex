@@ -259,8 +259,7 @@ repmgr=#
    \begin{itemize}
       \item Sur le serveur primaire hqpg-0x, créer le fichier /etc/repmgr/15/\textbf{repmgr.conf} ci-dessous
       \item Il est important de ne pas le créer dans le répertoire data car il risque d'être écrasé ou supprimé par les opérations de réplication
-\begin{tiny}
-\begin{Verbatim}[commandchars=\\\{\}]
+\begin{Verbatim}[fontsize=\tiny]
 node_id=1
 node_name='node1'
 conninfo='host=10.10.10.28 user=repmgr dbname=repmgr connect_timeout=2'
@@ -268,10 +267,9 @@ data_directory='/var/lib/pgsql/15/data'
 pg_bindir='/usr/pgsql-15/bin/'
 
 failover=automatic
-promote_command='/usr/pgsql-15/bin/repmgr standby promote -f /etc/repmgr/15/repmgr.conf --log-to-file'
-follow_command='/usr/pgsql-15/bin/repmgr standby follow -f /etc/repmgr/15/repmgr.conf --log-to-file --upstream-node-id=%n'
+promote_command='repmgr standby promote -f /etc/repmgr/15/repmgr.conf --log-to-file'
+follow_command='repmgr standby follow -f /etc/repmgr/15/repmgr.conf --log-to-file --upstream-node-id=%n'
 \end{Verbatim}
-\end{tiny}
    \end{itemize}
 
 \begin{toile}
@@ -366,8 +364,8 @@ data_directory='/var/lib/pgsql/15/data'
 pg_bindir='/usr/pgsql-15/bin/'
 
 failover=automatic
-promote_command='/usr/pgsql-15/bin/repmgr standby promote -f /etc/repmgr/15/repmgr.conf --log-to-file'
-follow_command='/usr/pgsql-15/bin/repmgr standby follow -f /etc/repmgr/15/repmgr.conf --log-to-file --upstream-node-id=%n'
+promote_command='repmgr standby promote -f /etc/repmgr/15/repmgr.conf --log-to-file'
+follow_command='repmgr standby follow -f /etc/repmgr/15/repmgr.conf --log-to-file --upstream-node-id=%n'
 \end{Verbatim}
 \end{tiny}
    \end{itemize}
@@ -712,8 +710,9 @@ $ /usr/pgsql-15/bin/repmgrd -f /etc/repmgr/15/repmgr.conf
    \begin{itemize}
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\{\}]
-[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr node rejoin -f /etc/repmgr/15/repmgr.conf -d 'host=10.10.10.45 dbname=repmgr user=repmgr' --force-rewind --config-files=postgresql.local.conf
-,postgresql.conf --verbose --dry-run                                                                                                                                                          
+[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr node rejoin -f /etc/repmgr/15/repmgr.conf \
+  -d 'host=10.10.10.45 dbname=repmgr user=repmgr' --force-rewind \
+  --config-files=postgresql.local.conf,postgresql.conf --verbose --dry-run
 NOTICE: using provided configuration file "/etc/repmgr/15/repmgr.conf"                                                                                                                        
 NOTICE: rejoin target is node "node2" (ID: 2)                                                                                                                                                 
 INFO: replication connection to the rejoin target node was successful                                                                                                                         
@@ -742,8 +741,9 @@ INFO: prerequisites for executing NODE REJOIN are met
    \begin{itemize}
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\{\}]
-[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr node rejoin -f /etc/repmgr/15/repmgr.conf -d 'host=10.10.10.45 dbname=repmgr user=repmgr' --force-rewind=/usr/pgsql-15/bin/pg_rewind --config
--files=postgresql.local.conf,postgresql.conf --verbose                                         
+[postgres@localhost ~]$ /usr/pgsql-15/bin/repmgr node rejoin -f /etc/repmgr/15/repmgr.conf \
+   -d 'host=10.10.10.45 dbname=repmgr user=repmgr' --force-rewind=/usr/pgsql-15/bin/pg_rewind \
+   --config-files=postgresql.local.conf,postgresql.conf --verbose                                         
 NOTICE: using provided configuration file "/etc/repmgr/15/repmgr.conf"                         
 NOTICE: rejoin target is node "node2" (ID: 2)                                                  
 INFO: prerequisites for using pg_rewind are met                                                
