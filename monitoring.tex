@@ -27,12 +27,96 @@
 \begin{frame}[fragile]{Le système de statistiques cumulatif}
 
    \begin{itemize}
-      \item WIP
+      \item Le système de statistiques cumulatif de PostgreSQL collecte et informe le DBA de l'activité du serveur
+      \item Actuellement, l'accès aux tables et aux indexes - que ce soit au niveau ligne ou au niveau bloc - sont comptabilisés
+      \item Le nombre total de lignes de chaque table et les informations sur le VACUUM et l'ANALYZE sont inclus
+      \item Dans le cas où l'option est activée, les appels aux fonctions définies par l'utilisateur et leur temps d'utilisation sont également inclus dans les statistiques
    \end{itemize}
 
 \begin{toile}
-\toileurl{}
+\toileurl{https://www.postgresql.org/docs/15/monitoring-stats.html}
 \end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Les statistiques dynamiques}
+
+   \begin{itemize}
+      \item PostgreSQL informe également le DBA des événements actuellement en cours sur la base de données
+      \item Par exemple, la liste des requêtes en cours sur le serveur
+      \item La liste des connexions en cours sur le serveur
+      \item Cette fonctionnalité est indépendante du système de statistiques cumulatif
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Activation des statistiques cumulatives - \textbf{track\_*}}
+
+   \begin{itemize}
+      \item La collecte de statistiques engendre une activité supplémentaires, le système permet au DBA d'activer ou non la collecte
+      \item Les paramètres d'activation de la collecte sont dans postgresql.conf
+      \item \textbf{track\_activities}: supervision de la commande en cours exécutée sur le serveur
+      \item \textbf{track\_counts}: active le système de collecte de statistiques sur les tables et les indexes
+      \item \textbf{track\_counts}: surveillance de l'utilisation des fonctions utilisateurs
+      \item \textbf{track\_io\_timing}: supervision des temps de lecture/écrire de blocs
+      \item \textbf{track\_wal\_io\_timing}: supervision des temps d'écrire de WAL
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/runtime-config-statistics.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Activation globale ou par session}
+
+   \begin{itemize}
+      \item Les paramètres \textbf{track\_*} enregistrés dans postgresql.conf s'appliquent à l'ensemble des process du serveur
+      \item Il est possible de les activer/désactiver par session avec la commande \textbf{SET}
+      \item Par mesure de sécurité, seuls les super-utilisateurs peuvent utiliser la commande SET
+   \end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/sql-set.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Stockage des statistiques collectées}
+
+   \begin{itemize}
+      \item Les statistiques cumumlées sont stockées dans la mémoire partagée (\textbf{shared\_buffers})
+      \item Chaque process collecte les informations locales puis met à jour la mémoire partagée à intervalles réguliers
+      \item Lorsqu'un serveur (les réplicats inclus) s'arrête proprement, une copie permanente des statistiques est stockée dans le répertoire \textbf{pg\_stat}
+      \item Cela permet de récupérer les statistiques au prochain démarrage du serveur
+      \item En cas d'arrêt brutal du serveur (arrêt immédiat, crash, redémarrage à partir d'un basebackup ou d'un PITR), ces statistiques sont remis à zéro
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Lecture des statistiques collectées}
+
+   \begin{itemize}
+      \item Il existe différentes vues pour accéder aux statistiques collectées
+      \item Ces vues ne sont pas mises instantanément à jour
+      \item Chaque process met à jour ces vues à un intervalle max de \textbf{PGSTAT\_MIN\_INTERVAL} millisecondes (valeur par défaut 1 seconde)
+      \item Cependant, les statistiques collectées par \textbf{track\_activities} sont à jour
+      \item Lorsqu'un process fournit des statistiques, les valeurs accédées sont mises en cache jusqu'à la fin de la transaction
+      \item Cela signifie que ces informations resteront inchangées tout au long de la transaction
+      \item Ce n'est pas un bug mais une feature :) dans le sens, où l'ensemble des statistiques restent cohérents pendant la transaction
+      \item Cela permet d'avoir une vue cohérente pour les outils de collecte de statistiques
+
+   \end{itemize}
 
 \end{frame}
 
