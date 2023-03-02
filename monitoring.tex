@@ -196,20 +196,47 @@
 %
 %\end{frame}
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%\begin{frame}{Supervision de l'activité des disques}
-%
-%\begin{itemize}
-%
-%   \item TODO
-%
-%\end{itemize}
-%
-%\begin{toile}
-%\toileurl{https://www.postgresql.org/docs/15/diskusage.html}
-%\end{toile}
-%
-%\end{frame}
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Supervision de l'activité des disques}
+
+\begin{itemize}
+
+   \item Chaque table possède un fichier primaire en disque où la majorité de ses données sont stockées
+   \item Ce fichier est appelé \textbf{heap} (tas)
+   \item Dans le cas où la table possède des colonnes ayant une valeur très large, un fichier de type \textbf{TOAST} est associé à la table
+   \item Il peut y avoir également des indexes associés à la table
+   \item Ces indexes sont stockés à un endroit différent du disque
+   \item Chaque table et index est stocké sur un fichier séparé. Il est possible que ce soit plusieurs fichiers dans le cas où la taille dépasse 1 Goctets
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/diskusage.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Outils de supervision des disques}
+
+\begin{itemize}
+
+   \item Il existe 3 méthodes de supervision de l'utilisation des disques:
+   \begin{itemize}
+      \item les fonctions d'administration
+      \item le module \textbf{oid2name}
+      \item une inspection manuelle du catalogue système
+   \end{itemize}
+
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/functions-admin.html\#FUNCTIONS-ADMIN-DBSIZE}
+\toileurl{https://www.postgresql.org/docs/15/oid2name.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

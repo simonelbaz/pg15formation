@@ -668,6 +668,23 @@ createdb -T template0 dbname
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Modèles de base de données - Template databases}
+
+\begin{itemize}
+   \item La commande \textbf{CREATE DATABASE} fonctionne en copiant une base de données.
+   \item Par défaut, elle copie la base de données standard \textbf{template1}.
+   \item Si des objets sont créés dans template1, ils seront présents dans les bases créées ultérieurement
+   \item Par exemple, si le langage PL/Perl est déployé sur template1, il sera présent sur l'ensemble des bases dérivées
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/manage-ag-templatedbs.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %\section{Jeu de caractères}
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
