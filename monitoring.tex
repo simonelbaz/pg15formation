@@ -115,7 +115,70 @@
       \item Cela signifie que ces informations resteront inchangées tout au long de la transaction
       \item Ce n'est pas un bug mais une feature :) dans le sens, où l'ensemble des statistiques restent cohérents pendant la transaction
       \item Cela permet d'avoir une vue cohérente pour les outils de collecte de statistiques
+   \end{itemize}
 
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Décalage des statistiques collectées - \textbf{stats\_fetch\_consistency}}
+
+   \begin{itemize}
+      \item Lorsque les statistiques sont récupérées de manière interactive ou en passant par des requêtes coûteuses, l'accès aux différents résultats peut engendrer un retard important dans l'affichage des résultats
+      \item Pour minimiser le retard, le paramètre \textbf{stats\_fetch\_consistency} peut être positionné avec la valeur \textit{snapshot}
+      \item Cela engendre une utilisation plus importante de mémoire partagée
+      \item Dans le cas où l'accès aux statistiques n'est pas fréquent, ce paramètre peut être positionné à \textit{none}
+      \item La fonction \textbf{pg\_stat\_clear\_snapshot()} peut être utilisée pour supprimer le snapshot de statistiques
+      \item L'accès aux statistiques est autorisé pour les super-utilisateurs ou pour le rôle ayant la permission \textbf{pg\_read\_all\_stats}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Statistiques d'une transaction - Vues \textbf{pg\_stat\_xact*}}
+
+   \begin{itemize}
+      \item Une transaction peut voir ses propres statistiques en temps réel non encore écrits en cache
+      \item Ces statistiques sont stockées dans les vues:
+      \begin{itemize}
+         \item pg\_stat\_xact\_all\_tables
+         \item pg\_stat\_xact\_sys\_tables
+         \item pg\_stat\_xact\_user\_tables
+         \item pg\_stat\_xact\_user\_functions
+      \end{itemize}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Liste des vues}
+
+   La liste des vues pour les statistiques dynamiques est:
+   \begin{itemize}
+      \item pg\_stat\_activity
+      \item pg\_stat\_replication
+      \item pg\_stat\_wal\_receiver
+      \item pg\_stat\_recovery\_prefetch
+      \item pg\_stat\_subscription
+      \item pg\_stat\_ssl
+      \item pg\_stat\_gssapi
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Liste des vues}
+
+   \begin{itemize}
+      \item pg\_stat\_progress\_analyze
+      \item pg\_stat\_progress\_create\_index
+      \item pg\_stat\_progress\_vacuum
+      \item pg\_stat\_progress\_cluster
+      \item pg\_stat\_progress\_basebackup
+      \item pg\_stat\_progress\_copy
    \end{itemize}
 
 \end{frame}
