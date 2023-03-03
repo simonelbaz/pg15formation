@@ -1,0 +1,182 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Jeu de caractères}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Support de la localisation}
+
+\begin{itemize}
+   \item PostgreSQL supporte 2 outils pour la localisation:
+   \begin{itemize}
+      \item Utilisation des paramètres locaux du système
+      \item Fourniture de jeux de caractères pour le stockage dans tous les langages. Les jeux de caractères permettent la traduction d'un alphabet à un autre entre le client et le serveur
+   \end{itemize}
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/charset.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Utilisation des paramètres locaux du système}
+
+\begin{itemize}
+   \item Les paramètres locaux du système apportent les fonctionnalités suivantes:
+   \begin{itemize}
+      \item le tri des chaînes et des caractères propres au langage local
+      \item le formatage des nombres
+      \item la traduction des messages
+      \item \ldots
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Support de la \textbf{locale}}
+
+\begin{itemize}
+   \item Le support d'une \textbf{locale} signifie que l'application respecte les préférences culturelles pour un alphabet, le tri et le format des nombres
+   \item PostgreSQL utilise les standards \textit{ISO C} et \textit{POSIX locale} fournis par l'OS du serveur
+   \item Le support de la locale pour un serveur de base de données pendant la phase d'\textbf{initdb}
+   \item \textbf{initdb} initialise le serveur avec la locale de son environnement d'exécution
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Récupération de la \textbf{locale} d'un environnement}
+
+\begin{itemize}
+   \item La commande ci-dessous permet de récupérer la locale de l'environnement:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+[linagora@localhost ~]$ locale
+LANG=fr\_FR.UTF-8
+LC\_CTYPE="fr\_FR.UTF-8"
+LC\_NUMERIC="fr\_FR.UTF-8"
+LC\_TIME="fr\_FR.UTF-8"
+LC\_COLLATE="fr\_FR.UTF-8"
+LC\_MONETARY="fr\_FR.UTF-8"
+LC\_MESSAGES="fr\_FR.UTF-8"
+LC\_PAPER="fr\_FR.UTF-8"
+LC\_NAME="fr\_FR.UTF-8"
+LC\_ADDRESS="fr\_FR.UTF-8"
+LC\_TELEPHONE="fr\_FR.UTF-8"
+LC\_MEASUREMENT="fr\_FR.UTF-8"
+LC\_IDENTIFICATION="fr\_FR.UTF-8"
+LC\_ALL=
+\end{Verbatim}
+\end{tiny}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Choix de la locale à l'initdb}
+
+\begin{itemize}
+   \item Il est possible de faire le choix explicite de la localte à l'initdb:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+initdb --locale=fr\_CA
+\end{Verbatim}
+\end{tiny}
+   \item S'il existe plusieurs jeux de caractères pour une lcale, il est également possible d'ajouter le jeu de caractères:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+initdb --locale=fr\_CA.UTF-8
+\end{Verbatim}
+\end{tiny}
+   \item Le format est donc: \textit{langage\_territoire.encodage}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Locales disponibles dans un environnement}
+
+\begin{itemize}
+   \item Pour obtenir la liste des locales disponibles dans un environnement, la commande suivante peut être utilisée:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+locale -a
+\end{Verbatim}
+\end{tiny}
+   \item La signification des paramètres \textbf{LC\_*} est la suivante:
+   \begin{itemize}
+      \item LC\_COLLATE: tri des chaînes de caractères
+      \item LC\_CTYPE: classification des caractères (qu'est ce qu'une lettre ? quelle est son équivalent en majuscule ?)
+      \item LC\_MESSAGES: langage des messages
+      \item LC\_MONETARY: formatage des monnaies
+      \item LC\_NUMERIC: formatage des nombres
+      \item LC\_TIME: formatage des dates et des durées
+   \end{itemize}
+   \item Il est possible de modifier ces paramètres en tant que variables d'environnement
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Modification des variables \textbf{LC\_*} à l'\textbf{initdb}}
+
+\begin{itemize}
+   \item Pour surcharger la définition des variables d'environnement \textbf{LC\_*} à l'initdb, celui-ci peut être lancé de la manière suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+initdb --locale=fr\_CA --lc-monetary=en\_US
+\end{Verbatim}
+\end{tiny}
+   \item Si le DBA souhaite que le serveur ne supporte pas de locale, il est possible d'utiliser la locale spéciale \textbf{C} ou son équivalent \textbf{POSIX}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Changement des valeurs \textbf{LC\_*} après l'initdb}
+
+\begin{itemize}
+   \item Certaines 
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{La collation}
+
+\begin{itemize}
+   \item \textbf{Définition:} La collation permet de définir le tri et la classification des caractères des données par colonnes ou par opération
+   \item Cela permet de contourner la restriction que les paramètres \textbf{LC\_COLLATE} et \textbf{LC\_CTYPE} ne peuvent pas être modifiés après la création d'une base de données
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/collation.html}
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Changement de collation}
+
+\begin{itemize}
+   \item WIP
+\end{itemize}
+
+\begin{toile}
+\toileurl{https://www.postgresql.org/docs/15/sql-altercollation.html\#SQL-ALTERCOLLATION-NOTES}
+\end{toile}
+
+\end{frame}
+
